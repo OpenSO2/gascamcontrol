@@ -5,6 +5,9 @@ import camera.cameras as cameras
 import log
 import tui
 import conf
+import ioo as io
+import comm
+import display
 
 
 class so2cam():
@@ -16,6 +19,10 @@ class so2cam():
         self.conf = conf.Conf()
         self.conf.parse()
         # self.tui = tui
+        self.io = io.Io()
+        self.comm = comm.Comm()
+        self.display = display.Display()
+
 
     def __enter__(self):
         # self.cameras.init()
@@ -38,21 +45,25 @@ class so2cam():
                 print("Got CancelledError bullshit_logger")
                 break
 
-    async def monitor_cameras(self):
+    async def monitor_cameras(self, loop):
         # import logging
         # logger = logging.getLogger('myLog')
-        self.log.info("init cam done")  # fixme
-        print("init cam done")
-        await cams.init(self.loop)
+        self.log.info("init cam done")
+        await cams.init(loop)
 
         while True:
             try:
-                await asyncio.sleep(.1)
+                await asyncio.sleep(3)
                 cam = await cams.start(self.loop)
                 import numpy as np
-                self.log.info(np.shape(cam))
+                self.log.info(f"shape received {np.shape(cam)}")
+                # self.log.warning(f"cam res {cam[100:200]}")
+
+                await self.display.send(cam)
+
+                await self.io.save_png("test.png", cam, loop)
             except asyncio.CancelledError:
-                self.log.warn("Got CancelledError monitor_cameras")
+                self.log.warning("Got CancelledError monitor_cameras")
                 break
 
     async def monitor_kbd(self, loop):
@@ -101,10 +112,13 @@ class so2cam():
 
     def startup(self):
         loop = asyncio.get_event_loop()
-        loop.create_task(self.bullshit_logger())
+        # loop.create_task(self.bullshit_logger())
         loop.create_task(self.monitor_kbd(loop))
         loop.create_task(self.monitor_tui())
-        loop.create_task(self.monitor_cameras())
+        loop.create_task(self.monitor_cameras(loop))
+        # self.comm.run()
+        self.display.run()
+
         self.loop = loop
 
         signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)

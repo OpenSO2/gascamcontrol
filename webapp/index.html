@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- <script type="text/javascript">
+    function renderToCanvas(){
+      canvas = document.querySelector("canvas")
+      var context = document.getElementById('canvas1').getContext("2d");
+
+      var img = new Image();
+      img.onload = function () {
+          context.drawImage(img, 0, 0);
+      }
+      img.src = "images/watermelon-duck.png";
+    }
+  </script> -->
+  <script type="text/javascript">
+    var myReader = new FileReader()
+    myReader.onload = function(event){
+        console.log(JSON.stringify(myReader.result));
+    }
+
+    HTMLCanvasElement.prototype.renderImage = function(blob){
+      console.log("render image", blob)
+      window.blobb = blob
+      // img = JSON.parse(blob)
+      console.log("parsed: ", img)
+      // img = img.map(e => e[0])
+      console.log("mapped: ", img)
+
+      // console.log(myReader.readAsText(blob))
+      // console.log(JSON.parse(myReader.readAsText(blob)))
+      // console.log(JSON.parse(myReader.readAsBinaryString(blob)))
+      /*
+      var ctx = this.getContext('2d')
+      var img = new Image()
+
+      img.onload = function(){
+        ctx.drawImage(img, 0, 0)
+      }
+
+      img.src = URL.createObjectURL(blob)
+      */
+    };
+  </script>
+  <script type="text/javascript">
+    var connection = new WebSocket('ws://localhost:8080/ws');
+
+    // When the connection is open, send some data to the server
+    connection.onopen = () => {
+        console.log("connected")
+        // connection.send('Ping')
+    }
+    connection.onerror = function (error) {
+      console.log('WebSocket Error ' + error);
+    };
+
+    var reader = new FileReader()
+    reader.addEventListener("load", () => {
+        console.time("timer");
+        console.log("res:")
+        console.log(reader.result)
+
+        width = 1344
+        height = 1024
+        ctx = document.querySelector("canvas").getContext("2d")
+        var mappedBuffer = new Uint16Array(reader.result, length, reader.result.length)
+
+        var imageData = ctx.createImageData(width, height);
+        var data = imageData.data;
+
+        // copy img byte-per-byte into our ImageData
+        // RGBA   16bit -> 8bit  256
+        // console.time("calc black and white image");
+        // for (var i = 0, len = width * height * 4; i < len; i += 4) {
+        //     data[i+0] = Math.round(mappedBuffer[i] / 256)
+        //     data[i+1] = Math.round(mappedBuffer[i] / 256)
+        //     data[i+2] = Math.round(mappedBuffer[i] / 256)
+        //     data[i+3] = Math.round(255)
+        // }
+        // console.timeEnd("calc black and white image");
+        // console.log(mappedBuffer)
+        // var data = imageData.data;
+        console.time("calc black and white image fast");
+        for (var i = 0, len = width * height * 4; i < len; i += 4) {
+            v = mappedBuffer[i]>>8
+            data[i + 0] = v
+            data[i + 1] = v
+            data[i + 2] = v
+            data[i + 3] = 255
+        }
+        console.timeEnd("calc black and white image fast");
+        console.log(data)
+
+        console.time("put image data");
+        ctx.putImageData(imageData, 0, 0);
+        console.timeEnd("put image data");
+
+        console.timeEnd("timer");
+    })
+
+    reader.addEventListener("error", () => console.log("error"))
+
+    // Log messages from the server
+    connection.onmessage = function (e) {
+      console.log("onmessage")
+      // console.log('Server: ' + e.data);
+      console.log(window.eeee = e)
+//      if(typeof e.data == "object"){
+        console.log("render image")
+        window.blobb = e.data
+//        arr = Uint16Array.from(window.blobb)
+//        print("arr", arr)
+        ra = reader.readAsArrayBuffer(eeee.data)
+        console.log("ra", ra)
+        // document.querySelector("canvas").renderImage(e.data)
+//      }
+    };
+  </script>
+
+<style media="screen">
+    canvas {
+      background: lime;
+      border: 1px solid red;
+      width: 100%;
+      height: 100%;
+    }
+</style>
+
+</head>
+<body>
+  <h1>Hallo Welt!</h1>
+  <canvas />
+</body>
+</html>
