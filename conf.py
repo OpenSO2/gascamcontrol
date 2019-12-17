@@ -83,7 +83,8 @@ class Conf():
         starting with '#' are ignored, as are unknown keys.
         """
         self.parser = configargparse.ArgParser(
-            default_config_files=self.get_config_file_paths())
+            default_config_files=self.get_config_file_paths(),
+            args_for_writing_out_config_file=["-w", "--write-out-config-file"])
 
         self.parser.add("--InterFrameDelay", default=10,
                         help="delay between two frames in ms")
@@ -175,11 +176,3 @@ class Conf():
                         help="configuration file path")
 
         self.options = self.parser.parse_args()
-
-        # print(self.options)
-        # print("----------")
-        # self.parser.print_values()
-        # print("----------")
-        # print(self.options)
-
-        # print('port', parserself ['port'])
