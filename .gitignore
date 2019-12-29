@@ -1,2 +1,6 @@
 todo.txt
 graveyard
+__pycache__
+Makefile
+CMakeCache.txt
+cmake_install.cmake

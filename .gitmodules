@@ -1,0 +1,6 @@
+[submodule "devices/viscam/drivers/mock/pybind11"]
+	path = devices/viscam/drivers/mock/pybind11
+	url = https://github.com/pybind/pybind11
+[submodule "devices/viscam/drivers/elpcam/pybind11"]
+	path = devices/viscam/drivers/elpcam/pybind11
+	url = https://github.com/pybind/pybind11
