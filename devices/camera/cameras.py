@@ -1,11 +1,9 @@
 """Implement pluggable interface for UV dual view cameras."""
-
 from concurrent.futures import ThreadPoolExecutor
 import logging
+from log import stdout_redirector
 from .camera_py import (camera_init, sSO2Parameters, config,
-                       camera_autosetExposure, camera_get, camera_uninit)
-from log import OutputGrabber
-
+                        camera_autosetExposure, camera_get, camera_uninit)
 
 logger = logging.getLogger('myLog')
 
@@ -13,10 +11,10 @@ logger = logging.getLogger('myLog')
 class Camera():
     """Manage a camera device through a driver. Abstract c nastyness."""
 
-    def __init__(self, id):
+    def __init__(self, identifier):
         self.isready = False
         self.cam = None
-        self.identifier = id
+        self.identifier = identifier
         logger.info("__init__ cam done")
 
     async def init(self, loop):
@@ -31,7 +29,8 @@ class Camera():
         conf.dExposureTime_b = 250000
 
         logger.info("init camera...")
-        await loop.run_in_executor(ThreadPoolExecutor(), camera_init, cam)
+        with stdout_redirector():
+            await loop.run_in_executor(ThreadPoolExecutor(), camera_init, cam)
         logger.info("init camera done.")
 
         logger.info("camera set camera autoset exposure")
@@ -48,12 +47,11 @@ class Camera():
         return cam
 
     async def get(self, loop):
-        logger.info("camera get image")
-
-        out = OutputGrabber(threaded=True)
-        with out:
+        with stdout_redirector():
             stat = await loop.run_in_executor(ThreadPoolExecutor(), camera_get,
                                               self.cam, 1)
+
+        logger.info('==gotten img')
         if stat:
             logger.error("failed to get image from camera")
         # return -1
@@ -119,7 +117,18 @@ class Cameras():
         self.camera2 = None
         self.issetup = True
 
+        import io, ctypes, os
+        libc = ctypes.CDLL(None)
+
+        f = io.BytesIO()
+        # with stdout_redirector(f):
+        #     await self.camera1.init(loop)
+        #     libc.puts(b'this comes from C')
+        #     os.system('echo and this is from echo')
+
         await self.camera1.init(loop)
+        logger.warning('Got stdout: "{0}"'.format(f.getvalue().decode('utf-8')))
+
         logger.info("init cam done")
 
     async def start(self, loop):

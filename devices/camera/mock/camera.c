@@ -18,7 +18,6 @@
 #include<stdlib.h>
 #include "configurations.h"
 #include "camera.h"
-#include "log.h"
 
 #include "getBufferFromFile.c"
 
@@ -42,6 +41,11 @@ pthread_t thread_id_b = 0;
 /* public */
 int camera_init(sParameterStruct * sSO2Parameters)
 {
+
+	printf("init \n");
+	fprintf(stdout, "init 2 \n");
+	fprintf(stderr, "errrrrr \n");
+
 	bufferSetA = 0;
 	bufferSetB = 0;
 	if (sSO2Parameters->identifier == 'a') {
@@ -88,7 +92,7 @@ int camera_get(sParameterStruct * sSO2Parameters, int waiter)
 	short *stBuffer = NULL;
 	int bufferSet = 0;
 
-	log_message("! Mocking camera ! No real measurements are taken");
+	printf("! Mocking camera ! No real measurements are taken");
 
 	if (sSO2Parameters->identifier == 'a') {
 		bufferSet = bufferSetA;

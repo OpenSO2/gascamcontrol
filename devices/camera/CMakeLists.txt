@@ -99,7 +99,7 @@ if(${MOCK_CAMERA})
 	# add_library(camera_py SHARED ../timehelpers.c ./mock/camera.c camera_py.cpp)
 	target_link_libraries(camera_py ${Boost_LIBRARIES} ${PROJECT_NAME})
 	target_link_libraries(camera_py camera)
-	target_link_libraries(camera_py log)
+# 	target_link_libraries(camera_py log)
 	set_target_properties(camera_py PROPERTIES PREFIX "")
 
 else()
@@ -162,9 +162,9 @@ target_link_libraries(camera-cli camera)
 target_link_libraries( camera-cli ${OpenCV_LIBS} )
 
 # add log dependency
-if(NOT TARGET log)
-	add_subdirectory(../log log)
-	include_directories( ../log )
-endif()
+# if(NOT TARGET log)
+# 	add_subdirectory(../log log)
+# 	include_directories( ../log )
+# endif()
 
-target_link_libraries(camera-cli log)
+# target_link_libraries(camera-cli log)
