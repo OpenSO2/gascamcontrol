@@ -1,91 +1,79 @@
 # https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
 import logging
 import sys
-from conf import options as settings
 import os
-import threading
-import time
+from contextlib import contextmanager
+import ctypes
+import io
+import tempfile
+from conf import options as settings
 
-class OutputGrabber():
-    """Class used to grab standard output or another stream."""
-    escape_char = "\b"
 
-    def __init__(self, stream=None, threaded=False):
-        self.origstream = stream
-        self.threaded = threaded
-        if self.origstream is None:
-            self.origstream = sys.stdout
-        self.origstreamfd = self.origstream.fileno()
-        self.capturedtext = ""
-        # Create a pipe so the stream can be captured:
-        self.pipe_out, self.pipe_in = os.pipe()
+@contextmanager
+def stdout_redirector():
+    libc = ctypes.CDLL(None)
+    c_stdout = ctypes.c_void_p.in_dll(libc, 'stdout')
+    c_stderr = ctypes.c_void_p.in_dll(libc, 'stderr')
 
-    def __enter__(self):
-        self.start()
-        return self
+    streamout = io.BytesIO()
+    streamerr = io.BytesIO()
+    # The original fd stdout points to. Usually 1 on POSIX systems.
+    original_stdout_fd = sys.stdout.fileno()
+    original_stderr_fd = sys.stderr.fileno()
 
-    def __exit__(self, *args):
-        self.stop()
+    def _redirect_stdout(to_fd):
+        """Redirect stdout to the given file descriptor."""
+        # Flush the C-level buffer stdout
+        libc.fflush(c_stdout)
+        # Flush and close sys.stdout - also closes the file descriptor (fd)
+        sys.stdout.close()
+        # Make original_stdout_fd point to the same file as to_fd
+        os.dup2(to_fd, original_stdout_fd)
+        # Create a new sys.stdout that points to the redirected fd
+        sys.stdout = io.TextIOWrapper(os.fdopen(original_stdout_fd, 'wb'))
 
-    def start(self):
-        """
-        Start capturing the stream data.
-        """
-        self.capturedtext = ""
-        # Save a copy of the stream:
-        self.streamfd = os.dup(self.origstreamfd)
-        # Replace the original stream with our write pipe:
-        os.dup2(self.pipe_in, self.origstreamfd)
-        if self.threaded:
-            # Start thread that will read the stream:
-            self.workerThread = threading.Thread(target=self.readOutput)
-            self.workerThread.start()
-            # Make sure that the thread is running and os.read() has executed:
-            time.sleep(0.01)
+    def _redirect_stderr(to_fd):
+        """Redirect stdout to the given file descriptor."""
+        # Flush the C-level buffer stdout
+        libc.fflush(c_stderr)
+        # Flush and close sys.stdout - also closes the file descriptor (fd)
+        sys.stderr.close()
+        # Make original_stdout_fd point to the same file as to_fd
+        os.dup2(to_fd, original_stderr_fd)
+        # Create a new sys.stdout that points to the redirected fd
+        sys.stderr = io.TextIOWrapper(os.fdopen(original_stderr_fd, 'wb'))
 
-    def stop(self):
-        """Stop capturing stream data and save the text in `capturedtext`."""
-        # Print the escape character to make the readOutput method stop:
-        self.origstream.write(self.escape_char)
-        # Flush the stream to make sure all our data goes in before
-        # the escape character:
-        self.origstream.flush()
-        if self.threaded:
-            # wait until the thread finishes so we are sure that
-            # we have until the last character:
-            self.workerThread.join()
-        else:
-            self.readOutput()
-        # Close the pipe:
-        os.close(self.pipe_in)
-        os.close(self.pipe_out)
-        # Restore the original stream:
-        os.dup2(self.streamfd, self.origstreamfd)
-        # Close the duplicate stream:
-        os.close(self.streamfd)
+    # Save a copy of the original stdout fd in saved_stdout_fd
+    saved_stdout_fd = os.dup(original_stdout_fd)
+    saved_stderr_fd = os.dup(original_stderr_fd)
+    try:
+        # Create a temporary file and redirect stdout to it
+        tfile = tempfile.TemporaryFile(mode='w+b')
+        _redirect_stdout(tfile.fileno())
+        tfileerr = tempfile.TemporaryFile(mode='w+b')
+        _redirect_stderr(tfileerr.fileno())
+        # Yield to caller, then redirect stdout back to the saved fd
+        yield
+        _redirect_stdout(saved_stdout_fd)
+        _redirect_stderr(saved_stderr_fd)
+        # Copy contents of temporary file to the given stream
+        tfile.flush()
+        tfile.seek(0, io.SEEK_SET)
 
-        self.logger = logging.getLogger("myLog")
-        self.logger.warning(f"len cpttxt{len(self.capturedtext)}")
-        self.logger.warning(self.capturedtext)
+        tfileerr.flush()
+        tfileerr.seek(0, io.SEEK_SET)
 
-    def readOutput(self):
-        """Read stream (one byte at a time) and save text to `capturedtext`."""
-        self.logger = logging.getLogger("myLog")
-        encoding = "iso-8859-1"
-        self.logger.warning("read output")
+        streamout.write(tfile.read())
+        streamerr.write(tfileerr.read())
+    finally:
+        tfile.close()
+        tfileerr.close()
+        os.close(saved_stdout_fd)
+        os.close(saved_stderr_fd)
 
-        while True:
-            char = os.read(self.pipe_out, 1)
-
-            self.logger.warning("self.escape_char" + self.escape_char)
-            if not char or self.escape_char in char.decode(encoding):
-                break
-            self.logger.warning("still something in there i guess " + char.decode(encoding))
-            print(char)
-
-            self.capturedtext += char.decode(encoding)
-            # self.capturedtext += "capture test"
-            # break
+        logger = logging.getLogger('myLog')
+        logger.info(streamout.getvalue().decode('utf-8').rstrip())
+        logger.error(streamerr.getvalue().decode('utf-8').rstrip())
 
 
 class Log():

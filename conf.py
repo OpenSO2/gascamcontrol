@@ -27,7 +27,8 @@ import os
 
 options = {
     "stop": False,
-    "logfile": "spam2.log"
+    "logfile": "spam2.log",
+    "viscam_driver": None
 }
 
 
@@ -36,7 +37,6 @@ class Conf():
 
     def __init__(self):
         self.parser = None
-        self.options = None
 
     def get_config_file_paths(self):
         """Find, load and parse a config file.
@@ -85,6 +85,9 @@ class Conf():
         self.parser = configargparse.ArgParser(
             default_config_files=self.get_config_file_paths(),
             args_for_writing_out_config_file=["-w", "--write-out-config-file"])
+        # fixme use arg for configfilepath
+        self.parser.add("--configfile", is_config_file=True,
+                        help="configuration file path")
 
         self.parser.add("--InterFrameDelay", default=10,
                         help="delay between two frames in ms")
@@ -172,7 +175,9 @@ class Conf():
         self.parser.add("--enableWebcam", default=1,
                         help="switch to disable webcam code")
         self.parser.add("--port", default="8080", help="comm port")
-        self.parser.add("--configfile", is_config_file=True,
-                        help="configuration file path")
 
+        self.parser.add("--viscam_driver", default="mock",
+                        help="which viscam driver to use")
         self.options = self.parser.parse_args()
+        global options
+        options = self.options

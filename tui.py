@@ -31,7 +31,9 @@ class Tui():
         self.logger = logging.getLogger('myLog')
         self._status_win = None
 
-    def __enter__(self):
+    # def __enter__(self):
+    def startup(self):
+        # return self
         stdscr = curses.initscr()
         self.stdscr = stdscr
         curses.noecho()
@@ -71,9 +73,11 @@ class Tui():
         self.status_win()
 
     def update(self):
+        # return
         self.handle_input()
 
     def handle_input(self):
+        # return
         inputchar = self.stdscr.getch()
         if inputchar == ord('1'):
             self.loglevel = logging.DEBUG
@@ -151,9 +155,10 @@ class Tui():
         win.addstr(1, 1, f"Aquisition: {status}")
         win.addstr(2, 1, f"Loglevel: {logging.getLevelName(self.loglevel)}")
         win.refresh()
-
-    def __exit__(self, *args):
-        curses.curs_set(1)
-        curses.nocbreak()
-        curses.echo()
-        curses.endwin()
+    #
+    # def __exit__(self, *args):
+    #     return
+    #     curses.curs_set(1)
+    #     curses.nocbreak()
+    #     curses.echo()
+    #     curses.endwin()

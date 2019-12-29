@@ -1,76 +1,64 @@
-import asyncio
 from aiohttp import web
 import aiohttp
 # from concurrent.futures import ThreadPoolExecutor
+import asyncio
 import logging
-import websockets
 
+a = {
+    'app': None
+}
 
 class Comm():
-    websocket = None
-
     def __init__(self):
-        self.logger = None
-
-    async def echo(self, websocket,):
-        self.logger("echo comm")
-        async for message in websocket:
-            self.logger.info(f"received msg, return {message}")
-            await websocket.send(message)
-
-    async def start2(self):
+        self.app = None
         self.logger = logging.getLogger('myLog')
-        self.logger.info("run comm")
 
-        websockets.serve(self.echo, 'localhost', 8081)
-        self.logger.info("running comm?")
-
-    async def hello(self, websocket, path):
-        name = await websocket.recv()
-        self.logger.info(f"< {name}")
-
-        greeting = f"Hello {name}!"
-
-        await websocket.send(greeting)
-        self.logger.info(f"> {greeting}")
-
-    def start2(self):
-        self.logger = logging.getLogger('myLog')
-        self.logger.info("run comm")
-
-        start_server = websockets.serve(self.hello, "localhost", 8080)
-        self.logger.info("run comm")
-        asyncio.get_event_loop().run_until_complete(start_server)
-        # asyncio.get_event_loop().run_forever()
+    websockets = []
 
     async def websocket_handler(self, request):
         logger = logging.getLogger('myLog')
 
-        ws = web.WebSocketResponse()
-        await ws.prepare(request)
+        websocket = web.WebSocketResponse()
+        await websocket.prepare(request)
+        self.websockets.append(websocket)
 
-        async for msg in ws:
+        async for msg in websocket:
             if msg.type == aiohttp.WSMsgType.TEXT:
                 if msg.data == 'close':
-                    await ws.close()
+                    await websocket.close()
                 else:
                     ans = msg.data + '/answer'
-                    logger.info(f'got msg {msg.data}, answered {ans}')
-                    await ws.send_str(ans)
+                    logger.info("got msg %s, answered %s", msg.data, ans)
+                    # await websocket.send_str(ans)
             elif msg.type == aiohttp.WSMsgType.ERROR:
-                logger.info('ws connection closed with exception %s' %
-                            ws.exception())
+                logger.info('ws connection closed with exception %s',
+                            websocket.exception())
 
         logger.info('websocket connection closed')
 
-        return ws
+        return websocket
+
+    async def send(self, img):
+        for websocket in self.websockets:
+            # if "send" in websocket:
+            # await websocket.send_str(f"img shape {img.shape}")
+            # await websocket.send_bytes(img.tobytes())
+            logger = logging.getLogger('myLog')
+            logger.info("send data")
+            img *= 16
+            # logger.info(str(img.tolist()))
+            await websocket.send_bytes(img.tobytes())
+
+    def serve_display(self, app):
+        app.router.add_static('/app', 'webapp', show_index=True)
 
     def run(self):
         app = web.Application()
-        app.add_routes([web.get('/ws', self.websocket_handler)])
 
-        logger = logging.getLogger('myLog')
-        logger.info("run comm")
+        app.add_routes([web.get('/ws', self.websocket_handler)])
+        self.serve_display(app)
+
+        self.logger.info("run comm")
 
         loop = asyncio.get_event_loop()
         runner = web.AppRunner(app)
