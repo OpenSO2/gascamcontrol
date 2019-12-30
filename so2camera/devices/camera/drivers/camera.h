@@ -17,15 +17,47 @@
  *
  * camera_abort
  * camera_uninit
- */
-#ifndef _CAMERA_
-#define _CAMERA_
+//  */
+// #ifndef _CAMERA_
+// #define _CAMERA_
+//
+// #ifdef __cplusplus
+// extern "C" {
+// #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/* Camera parameters */
+typedef struct {
+	/* A handle to identify the camera */
+	unsigned long hCamera;
 
-#include "configurations.h"
+	/* contains the Exposuretime in [ms] */
+	double exposuretime;
+
+	int width;
+	int height;
+
+	/* Pointer to image buffer */
+	short *stBuffer;
+
+  /* Pointer to image buffer */
+	int stBufferSize;
+
+	/* ~Callback stuff~ */
+
+	/* Event Flags */
+	volatile unsigned long fBufferReady;
+
+	/* Control Flags */
+	volatile unsigned long fFifoOverFlow;
+
+	/* Camera identifier */
+	char identifier;
+
+	/* flag to indicate that the current image is a dark image */
+	int dark;
+
+} sParameterStruct;
+
 
 /**
  * inits the camera/framegrabber
@@ -48,10 +80,10 @@ int camera_get(sParameterStruct *, int);
 int camera_abort(sParameterStruct *);
 
 int camera_setExposure(sParameterStruct *);
-int camera_autosetExposure(sParameterStruct *, sConfigStruct *);
+int camera_autosetExposure(sParameterStruct *);
 int camera_config(sParameterStruct *);
 
-#ifdef __cplusplus
-}
-#endif
-#endif
+// #ifdef __cplusplus
+// }
+// #endif
+// #endif

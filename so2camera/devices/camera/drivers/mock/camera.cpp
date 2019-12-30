@@ -6,6 +6,9 @@
 /* ignore unused parameters in this file */
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+#include <iostream>
+#include <unistd.h>
+
 #ifdef WIN
 #include<windows.h>
 #else
@@ -16,10 +19,9 @@
 #include<string.h>
 #include<stdio.h>
 #include<stdlib.h>
-#include "configurations.h"
-#include "camera.h"
+#include "../camera.h"
 
-#include "getBufferFromFile.c"
+#include "getBufferFromFile.cpp"
 
 /* local vars and prototypes */
 static int bufferSetA;
@@ -88,7 +90,7 @@ int camera_uninit(sParameterStruct * sSO2Parameters)
 
 int camera_get(sParameterStruct * sSO2Parameters, int waiter)
 {
-	char *filename;
+	const char *filename;
 	short *stBuffer = NULL;
 	int bufferSet = 0;
 
@@ -117,7 +119,7 @@ int camera_get(sParameterStruct * sSO2Parameters, int waiter)
 	}
 }
 
-int camera_autosetExposure(sParameterStruct * sSO2Parameters, sConfigStruct * config)
+int camera_autosetExposure(sParameterStruct * sSO2Parameters)
 {
 	return 0;
 }

@@ -15,10 +15,6 @@ PYBIND11_MODULE(viscam, m) {
 		m.def("get", &viscam_get, "Capture a frame from device and places buffer in viscam.buffer");
 		m.def("uninit", &viscam_uninit, "Stop device and frees ressources.");
 
-		// m.def("get", &viscam_get,
-		//       pybind11::call_guard<pybind11::scoped_ostream_redirect,
-		//                            pybind11::scoped_estream_redirect>());
-
     pybind11::class_<sVisCamStruct>(m, "viscam")
         .def(pybind11::init<>())
 				.def_property("width", [](sVisCamStruct * vc) {return vc->width;}, []() {})

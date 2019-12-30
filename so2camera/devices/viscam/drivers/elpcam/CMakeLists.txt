@@ -1,4 +1,3 @@
-# settings
 cmake_minimum_required(VERSION 2.8)
 project(viscam)
 
@@ -33,19 +32,9 @@ if(CMAKE_COMPILER_IS_GNUCC)
 	add_definitions("-Wmissing-declarations")
 endif()
 
-find_package(PythonInterp)
 
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
-
-if (PYTHONINTERP_FOUND)
-	if (PYTHON_VERSION_MAJOR EQUAL 3)
-		find_package(PythonInterp 3)
-		find_package(PythonLibs 3 REQUIRED)
-	endif()
-else()
-    message("Python not found")
-endif()
 
 add_subdirectory(pybind11)
 pybind11_add_module(viscam viscam.cpp ../viscam_py.cpp)

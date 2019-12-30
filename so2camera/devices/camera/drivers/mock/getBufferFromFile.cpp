@@ -1,8 +1,11 @@
 /* HEADER is N bytes
  * image size is  1344 * 1024 * 16/8
  */
-short *getBufferFromFile(char *filename, int offset);
-short *getBufferFromFile(char *filename, int offset)
+#include <iostream>
+#include <unistd.h>
+
+short *getBufferFromFile(const char *filename, int offset);
+short *getBufferFromFile(const char *filename, int offset)
 {
 	short *buffer = NULL;
 	unsigned int length;
@@ -23,7 +26,7 @@ short *getBufferFromFile(char *filename, int offset)
 	}
 
 	(void)fseek(f, offset, SEEK_SET);	/* offset for header */
-	buffer = malloc(length);
+	buffer = (short int*)malloc(length);
 	if (!buffer) {
 		printf("failed to create buffer\n");
 		free(buffer);

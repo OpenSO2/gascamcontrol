@@ -19,10 +19,17 @@ class Viscam():
 
     def __init__(self, driver):
         self.drivername = driver
-        self.driver = None
         self.loop = asyncio.get_event_loop()
-        self.viscam = None
         self.logger = logging.getLogger('myLog')
+
+        # FIXME: path
+        print(f"__file__={__file__}")
+        print(f"__name__={__name__}")
+        print(f"__package__={str(__package__)}")
+
+        visdriv = f"devices.viscam.drivers.{self.drivername}.viscam"
+        self.driver = importlib.import_module(visdriv)
+        self.viscam = self.driver.viscam()
 
     async def __aenter__(self):
         return await self.start()
@@ -32,19 +39,19 @@ class Viscam():
 
     async def start(self):
         """Initiate viscam device."""
-        # FIXME: path
-        visdriv = ".".join(["devices", "viscam",
-                            "drivers", self.drivername, "viscam"])
-        self.driver = importlib.import_module(visdriv)
-        self.viscam = self.driver.viscam()
+        print("start")
+        with stdout_redirector():
+            print("slljfdg")
+            st = await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                                 self.driver.init, self.viscam)
 
-        await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                        self.driver.init,
-                                        self.viscam)
-
+        if st:
+            print("ERRROROROR!")
+            print(f"fff {st}")
         return self
 
     async def get(self):
+        print("get")
         """Get a single image buffer."""
         with stdout_redirector():
             await self.loop.run_in_executor(ThreadPoolExecutor(),
@@ -55,6 +62,6 @@ class Viscam():
 
     async def stop(self):
         """Stop viscam and release device."""
-        await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                        self.driver.uninit,
-                                        self.viscam)
+        with stdout_redirector():
+            await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                            self.driver.uninit, self.viscam)
