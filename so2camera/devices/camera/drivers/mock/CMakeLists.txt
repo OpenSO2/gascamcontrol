@@ -7,7 +7,6 @@ if(CMAKE_COMPILER_IS_GNUCC)
 	add_definitions("-Wundef")
 	add_definitions("-Wextra")
 	add_definitions("-Wunused-parameter")
-	# add_definitions("-Wshadow")
 	add_definitions("-Wpointer-arith")
 	add_definitions("-Wcast-qual")
 	add_definitions("-Wno-missing-braces")
@@ -34,19 +33,27 @@ endif()
 
 message("=====MOCK_CAMERA=======")
 file(COPY fixtures/ DESTINATION fixtures/)
-add_definitions(-DCAMERA_MOCK_A_RAW="${CMAKE_CURRENT_SOURCE_DIR}/mock/fixtures/top.raw")
-add_definitions(-DCAMERA_MOCK_B_RAW="${CMAKE_CURRENT_SOURCE_DIR}/mock/fixtures/bot.raw")
-add_definitions(-DCAMERA_MOCK_A_RAW_DARK="${CMAKE_CURRENT_SOURCE_DIR}/mock/fixtures/top_dark.raw")
-add_definitions(-DCAMERA_MOCK_B_RAW_DARK="${CMAKE_CURRENT_SOURCE_DIR}/mock/fixtures/bot_dark.raw")
+add_definitions(-DCAMERA_MOCK_A_RAW="${CMAKE_CURRENT_SOURCE_DIR}/fixtures/top.raw")
+add_definitions(-DCAMERA_MOCK_B_RAW="${CMAKE_CURRENT_SOURCE_DIR}/fixtures/bot.raw")
+add_definitions(-DCAMERA_MOCK_A_RAW_DARK="${CMAKE_CURRENT_SOURCE_DIR}/fixtures/top_dark.raw")
+add_definitions(-DCAMERA_MOCK_B_RAW_DARK="${CMAKE_CURRENT_SOURCE_DIR}/fixtures/bot_dark.raw")
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 add_subdirectory(pybind11)
 pybind11_add_module(camera camera.cpp ../camera_py.cpp)
 
-if( ${UNIX} )
-	find_library(M_LIB m)
-	target_link_libraries(camera ${M_LIB})
-endif()
+# add_library(camera camera.cpp)
 
+# find_library(M_LIB m)
+# target_link_libraries(camera ${M_LIB})
 target_link_libraries(camera pthread)
+
+
+# create executables
+# add_executable(camera-cli camera-cli.cpp)
+# target_link_libraries(camera-cli camera)
+
+# find_package( OpenCV REQUIRED )
+# include_directories( ${OpenCV_INCLUDE_DIRS} )
+# target_link_libraries(camera-cli ${OpenCV_LIBS})

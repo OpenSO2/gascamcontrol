@@ -1,6 +1,12 @@
-[submodule "devices/viscam/drivers/mock/pybind11"]
-	path = devices/viscam/drivers/mock/pybind11
+[submodule "so2camera/devices/viscam/drivers/mock/pybind11"]
+	path = so2camera/devices/viscam/drivers/mock/pybind11
 	url = https://github.com/pybind/pybind11
-[submodule "devices/viscam/drivers/elpcam/pybind11"]
-	path = devices/viscam/drivers/elpcam/pybind11
+[submodule "so2camera/devices/viscam/drivers/elpcam/pybind11"]
+	path = so2camera/devices/viscam/drivers/elpcam/pybind11
+	url = https://github.com/pybind/pybind11
+[submodule "so2camera/devices/camera/drivers/mock/pybind11"]
+	path = so2camera/devices/camera/drivers/mock/pybind11
+	url = https://github.com/pybind/pybind11
+[submodule "so2camera/devices/camera/drivers/phx/pybind11"]
+	path = so2camera/devices/camera/drivers/phx/pybind11
 	url = https://github.com/pybind/pybind11

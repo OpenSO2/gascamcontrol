@@ -13,8 +13,7 @@
  */
 #include<phx_api.h>
 #include<phx_os.h>
-#include"log.h"
-#include"camera.h"
+#include"../camera.h"
 
 /* prototypes for private functions */
 int set_mode_speed(tHandle, char, char[9]);
@@ -29,52 +28,63 @@ int setup_camera(sParameterStruct * sSO2Parameters);
 int camera_abort(sParameterStruct * sSO2Parameters)
 {
 	tHandle hCamera = sSO2Parameters->hCamera;
-	log_debug("camera_abort");
+	printf("camera_abort\n");
 	return PHX_Acquire(hCamera, PHX_ABORT, NULL);
 }
 
 int camera_uninit(sParameterStruct * sSO2Parameters)
 {
 	tHandle hCamera = sSO2Parameters->hCamera;
-	log_debug("camera_uninit");
+	printf("camera_uninit\n");
 	return PHX_CameraRelease(&hCamera);
 }
 
-int camera_get(sParameterStruct * sSO2Parameters, int waiter)
+int camera_get(sParameterStruct * sSO2Parameters, int waiter = 1)
 {
 	sSO2Parameters->fBufferReady = (1 == 0);
-
+  printf("Get image from framegrabber\n");
 #pragma GCC diagnostic ignored "-Wpedantic"
-	PHX_Acquire(sSO2Parameters->hCamera, PHX_START, internalCallback);
+	PHX_Acquire(sSO2Parameters->hCamera, PHX_START, (void *)internalCallback);
 #pragma GCC diagnostic warning "-Wpedantic"
+	printf("internalCallback set\n");
 
 	if (waiter) {
 		/* if theres no callback, this function will work synchronously
 		 * and wait for the return of the image buffer
 		 */
 		while (!sSO2Parameters->fBufferReady) {
-			sleepMs(1);
+			printf("waiting\n");
+
+			usleep(1000);
 		}
+		printf("done waiting, stBufferSize is %i\n", sSO2Parameters->stBufferSize);
+
+		sSO2Parameters->dBufferlength = 1376256; // FIXME, thats just weird
+		sSO2Parameters->stBufferSize = 1376256*2;
+		sSO2Parameters->width = 1344;
+		sSO2Parameters->height = 1024;
+
 
 		camera_abort(sSO2Parameters);
+		printf("cleaned up\n");
 	}
 
 	return 0;
 }
 
-int camera_autosetExposure(sParameterStruct * sSO2Parameters, sConfigStruct * config)
+int camera_autosetExposure(sParameterStruct * sSO2Parameters)
 {
 	int status = 0;
-
-	status = getExposureTime(sSO2Parameters, config);
+  sSO2Parameters->dExposureTime = sSO2Parameters->exposuretime;  // FIXME: thats stupid. dont be stupid.
+	status = getExposureTime(sSO2Parameters);
 	if (status) {
-		log_error("exposure time couldn't be retrieved");
+		fprintf(stderr, "exposure time couldn't be retrieved\n");
 		return status;
 	}
 
 	status = camera_setExposure(sSO2Parameters);
 	if (status) {
-		log_error("exposure time wasn't set");
+		fprintf(stderr, "exposure time wasn't set\n");
 		return status;
 	}
 
@@ -85,21 +95,21 @@ int camera_setExposure(sParameterStruct * sSO2Parameters)
 {
 	double actualExposureTime;
 	double exposureTime = sSO2Parameters->dExposureTime;
-	etStat eStat = PHX_OK;
+	int eStat = PHX_OK;
 	char speed[9];
 	char m;
 
 	/* before doing anything check if exposure time is within the limits */
 	if (exposureTime < 2.4 || exposureTime > 1004400.) {
-		log_error("Exposure time declared in Configfile is out of range: 2.4us < Exposure Time > 1004.4ms");
+		fprintf(stderr, "Exposure time declared in Configfile is out of range: 2.4us < Exposure Time > 1004.4ms");
 		return PHX_ERROR_OUT_OF_RANGE;
 	}
 	calc_mode_speed(exposureTime, &actualExposureTime, &m, speed);
 	sSO2Parameters->dExposureTime = actualExposureTime;	/* update struct to the actual exposure time */
 	if (m == 'S') {
-		log_message("Camera %c uses electronic shutter. Exposure was set to approx. %f us which calculates to %f", sSO2Parameters->identifier, exposureTime, actualExposureTime);
+		printf("Camera %c uses electronic shutter. Exposure was set to approx. %f us which calculates to %f\n", sSO2Parameters->identifier, exposureTime, actualExposureTime);
 	} else {
-		log_message("Camera %c uses frameblanking. Exposure was set to approx. %f us which calculates to %f", sSO2Parameters->identifier, exposureTime, actualExposureTime);
+		printf("Camera %c uses frameblanking. Exposure was set to approx. %f us which calculates to %f\n", sSO2Parameters->identifier, exposureTime, actualExposureTime);
 	}
 
 	eStat = set_mode_speed(sSO2Parameters->hCamera, m, speed);
@@ -128,19 +138,19 @@ int calc_mode_speed(double exposureTime, double *actualExposureTime, char *m, ch
 
 int set_mode_speed(tHandle hCamera, char m, char speed[9])
 {
-	etStat eStat = PHX_OK;
+	int eStat = PHX_OK;
 	char mode[8];
 	sprintf(mode, "NMD %c\r", m);
 
 	eStat = sendMessage(hCamera, (ui8 *) mode);
 	if (PHX_OK != eStat) {
-		log_error("Setting camera mode failed");
+		fprintf(stderr, "Setting camera mode failed\n");
 		return eStat;
 	}
 
 	eStat = sendMessage(hCamera, (ui8 *) speed);
 	if (PHX_OK != eStat) {
-		log_error("setting shutter to %s failed", speed);
+		fprintf(stderr, "setting shutter to %s failed\n", speed);
 		return eStat;
 	}
 	return eStat;
@@ -152,23 +162,27 @@ int camera_init(sParameterStruct * sSO2Parameters)
 	int channel = sSO2Parameters->identifier == 'a' ? PHX_CHANNEL_A : PHX_CHANNEL_B;
 
 	/* Load the framegrabber with the phoenix configuration file. This function sets the necessary camera handles */
+	printf("PHX_CameraConfigLoad: %s %i\n", CAMERA_PCF_FILE, channel);
+
 	eStat = PHX_CameraConfigLoad(&sSO2Parameters->hCamera,
 		CAMERA_PCF_FILE,
-		(etCamConfigLoad) PHX_BOARD_AUTO | PHX_DIGITAL | channel | PHX_NO_RECONFIGURE | 1,
+		(etCamConfigLoad) channel,
+		// (etCamConfigLoad) PHX_BOARD_AUTO | PHX_DIGITAL | channel | PHX_NO_RECONFIGURE | 1,
 		&PHX_ErrHandlerDefault);
 	if (PHX_OK != eStat) {
-		log_error("loading camera config failed");
+		fprintf(stderr, "loading camera config failed\n");
 		return eStat;
 	}
+	printf("PHX_CameraConfigLoad complete\n");
 
 	/* Setup our own event context */
 	eStat = PHX_ParameterSet(sSO2Parameters->hCamera, PHX_EVENT_CONTEXT, (void *)sSO2Parameters);
 	if (PHX_OK != eStat) {
-		log_error("Setup the control flags structure failed");
+		fprintf(stderr, "Setup the control flags structure failed\n");
 		return eStat;
 	}
 
-	log_message("configuring of the frame grabber was successful");
+	printf("configuring of the frame grabber was successful\n");
 
 	return setup_camera(sSO2Parameters);
 }
@@ -179,46 +193,46 @@ int camera_init(sParameterStruct * sSO2Parameters)
 
 int setup_camera(sParameterStruct * sSO2Parameters)
 {
-	etStat eStat = PHX_OK;
+	int eStat = PHX_OK;
 	tHandle hCamera = sSO2Parameters->hCamera;
 
-	log_message("setup camera");
+	printf("setup camera\n");
 
 	/* initialize default values */
 	eStat = sendMessage(hCamera, (ui8 *) "INI\r");
 	if (PHX_OK != eStat) {
-		log_error("sending INI to camera was unsuccessful");
+		fprintf(stderr, "sending INI to camera was unsuccessful\n");
 		return eStat;
 	}
 	/* freerunning or external control mode: */
 	/* N freerun mode, E external */
 	eStat = sendMessage(hCamera, (ui8 *) "AMD N\r");
 	if (PHX_OK != eStat) {
-		log_error("sending AMD N to camera was unsuccessful");
+		fprintf(stderr, "sending AMD N to camera was unsuccessful\n");
 		return eStat;
 	}
 	/* scanning mode: N Normal, S superpixel */
 	eStat = sendMessage(hCamera, (ui8 *) "SMD N\r");
 	if (PHX_OK != eStat) {
-		log_error("sending SMD N to camera was unsuccessful");
+		fprintf(stderr, "sending SMD N to camera was unsuccessful\n");
 		return eStat;
 	}
 	/* horizontal pixel output: M = 1344 */
 	eStat = sendMessage(hCamera, (ui8 *) "SHA M\r");
 	if (PHX_OK != eStat) {
-		log_error("sending SHA M to camera was unsuccessful");
+		fprintf(stderr, "sending SHA M to camera was unsuccessful\n");
 		return eStat;
 	}
 	/* contrast enhancement gain: low */
 	/* CEG L CONTRAST ENHANCEMENT GAIN  (CEG L: 0dB) (CEG H: 14dB) */
-	log_message("set contrast enhancement gain to LOW");
+	printf("set contrast enhancement gain to LOW\n");
 	eStat = sendMessage(hCamera, (ui8 *) "CEG L\r");
 	if (PHX_OK != eStat) {
-		log_error("sending CEG L to camera was unsuccessful");
+		fprintf(stderr, "sending CEG L to camera was unsuccessful\n");
 		return eStat;
 	}
 
-	log_message("configuration of camera was successful");
+	printf("configuration of camera was successful\n");
 	return eStat;
 }
 
@@ -227,31 +241,31 @@ void internalCallback(tHandle hCamera, ui32 dwInterruptMask, void *params)
 	stImageBuff buffythevampireslayer;
 	etStat eStat;
 	sParameterStruct *sSO2Parameters = (sParameterStruct *) params;
-	log_debug("internal camera callback called");
+	printf("internal camera callback called\n");
 
 	/* Fifo Overflow */
 	if (PHX_INTRPT_FIFO_OVERFLOW & dwInterruptMask) {
-		log_error("a fifo overflow occured.");
+		fprintf(stderr, "a fifo overflow occured.\n");
 	}
 
 	/* Handle the Buffer Ready event */
 	if (PHX_INTRPT_BUFFER_READY & dwInterruptMask) {
 		eStat = PHX_Acquire(hCamera, PHX_BUFFER_GET, &buffythevampireslayer);
 		if (PHX_OK != eStat) {
-			log_error("frame couldn't be aquired");
+			fprintf(stderr, "frame couldn't be aquired\n");
 		}
 
-		sSO2Parameters->stBuffer = buffythevampireslayer.pvAddress;
+		sSO2Parameters->stBuffer = (short int*)buffythevampireslayer.pvAddress;
 		sSO2Parameters->hCamera = hCamera;
 		sSO2Parameters->fBufferReady = (1 == 1);
 	} else {
-		log_error("phx callback called but frame was not aquired");
+		fprintf(stderr, "phx callback called but frame was not aquired\n");
 	}
 }
 
 static int sendMessage(tHandle hCamera, ui8 * msg)
 {
-	etStat eStat = !PHX_OK;
+	bool eStat = !PHX_OK;
 	int i;
 	int sleepCycleCounter = 1;
 	int timeout = 500;
@@ -264,7 +278,7 @@ static int sendMessage(tHandle hCamera, ui8 * msg)
 		/* Transmit the serial data to the camera */
 		eStat = PHX_CommsTransmit(hCamera, msg, &msgLength, timeout);
 		if (PHX_OK != eStat) {
-			log_error("PHX_CommsTransmit() failed");
+			fprintf(stderr, "PHX_CommsTransmit() failed\n");
 			continue;	/* short circuit */
 		}
 
@@ -282,29 +296,29 @@ static int sendMessage(tHandle hCamera, ui8 * msg)
 		} while (0 == recvLength && PHX_OK == eStat);
 
 		if (PHX_OK != eStat) {
-			log_debug("nothing was received from camera");
+			printf("nothing was received from camera\n");
 			continue;	/* short circuit */
 		}
 
 		/* if data is received, download the data */
 		eStat = PHX_CommsReceive(hCamera, recv, &recvLength, timeout);
 		if (PHX_OK != eStat) {
-			log_debug("nothing was received from camera");
+			printf("nothing was received from camera\n");
 			continue;	/* short circuit */
 		}
 
 		/* if cameras answer equals input string, exit successful */
 		if (strncmp((const char *)msg, (const char *)msg, msgLength)) {
-			log_debug("String send and string received were not equal.");
+			printf("String send and string received were not equal.\n");
 			continue;	/* short circuit */
 		}
 		/* remove carriage return character from string for logging */
 		for (j = 0; j < recvLength; j++)
 			recv[j] = recv[j] == '\r' ? ' ' : recv[j];
-		log_debug("send message: %s was successful", recv);
+		printf("send message: %s was successful\n", recv);
 		return 0;	/* here return of SUCCESS */
 	}
 
-	log_error("sending message failed 3 times");
+	fprintf(stderr, "sending message failed 3 times\n");
 	return -1;
 }

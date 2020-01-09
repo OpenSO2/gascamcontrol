@@ -43,11 +43,6 @@ pthread_t thread_id_b = 0;
 /* public */
 int camera_init(sParameterStruct * sSO2Parameters)
 {
-
-	printf("init \n");
-	fprintf(stdout, "init 2 \n");
-	fprintf(stderr, "errrrrr \n");
-
 	bufferSetA = 0;
 	bufferSetB = 0;
 	if (sSO2Parameters->identifier == 'a') {
@@ -79,9 +74,8 @@ int camera_abort(sParameterStruct * sSO2Parameters)
 
 int camera_uninit(sParameterStruct * sSO2Parameters)
 {
-
 	if (sSO2Parameters->identifier == 'a') {
-		free(g_data_struct_a);
+	 	free(g_data_struct_a);
 	} else {
 		free(g_data_struct_b);
 	}
@@ -90,11 +84,15 @@ int camera_uninit(sParameterStruct * sSO2Parameters)
 
 int camera_get(sParameterStruct * sSO2Parameters, int waiter)
 {
+
+	fprintf(stderr, "! Mocking camera ! No real measurements are taken\n");
 	const char *filename;
 	short *stBuffer = NULL;
 	int bufferSet = 0;
+	int stBufferSize = 0;
 
-	printf("! Mocking camera ! No real measurements are taken");
+	printf("! Mocking camera ! No real measurements are taken\n");
+	fprintf(stderr, "! Mocking camera ! No real measurements are taken\n");
 
 	if (sSO2Parameters->identifier == 'a') {
 		bufferSet = bufferSetA;
@@ -105,18 +103,30 @@ int camera_get(sParameterStruct * sSO2Parameters, int waiter)
 		bufferSetB = 1;
 		filename = sSO2Parameters->dark ? CAMERA_MOCK_B_RAW_DARK : CAMERA_MOCK_B_RAW;
 	}
-
+	fprintf(stderr, "1");
 	if (bufferSet == 1)
 		free(sSO2Parameters->stBuffer);
 
-	stBuffer = getBufferFromFile(filename, 0);
+	stBuffer = getBufferFromFile(filename, 0, &stBufferSize);
+	fprintf(stderr, "== stBufferSize %i \n", stBufferSize);
+
+	// FIXME: Handle Error
+	// if (stBufferSize) {
 	if (stBuffer) {
+		sSO2Parameters->stBufferSize = stBufferSize;
 		sSO2Parameters->stBuffer = stBuffer;
 		sSO2Parameters->fBufferReady = 1;
+		sSO2Parameters->width = 1344;
+		sSO2Parameters->height = 1024;
+
+		fprintf(stderr, "\nstBuffer: stBufferSize %i\n\n", stBufferSize);
+
 		return 0;
-	} else {
-		return 1;
 	}
+	if(stBuffer == NULL)
+		fprintf(stderr, "stBuffer is NULL\n");
+	fprintf(stderr, "Failed to fill image buffer (size %i)\n", stBufferSize);
+	return 1;
 }
 
 int camera_autosetExposure(sParameterStruct * sSO2Parameters)

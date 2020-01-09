@@ -17,10 +17,10 @@
  *
  * camera_abort
  * camera_uninit
-//  */
-// #ifndef _CAMERA_
-// #define _CAMERA_
-//
+ */
+#ifndef _CAMERA_
+#define _CAMERA_
+
 // #ifdef __cplusplus
 // extern "C" {
 // #endif
@@ -39,7 +39,7 @@ typedef struct {
 	/* Pointer to image buffer */
 	short *stBuffer;
 
-  /* Pointer to image buffer */
+  /* Size of image buffer */
 	int stBufferSize;
 
 	/* ~Callback stuff~ */
@@ -55,6 +55,25 @@ typedef struct {
 
 	/* flag to indicate that the current image is a dark image */
 	int dark;
+
+	/*
+ 	 * A switch to set the exposuretime fix to the value given in
+ 	 * the config file
+ 	 */
+	 int dFixTime;
+
+	/* Number of pixels in 1 Image */
+	int dBufferlength;
+
+	/* exposure time in [us] */
+	double dExposureTime_a;
+	double dExposureTime_b;
+
+	/* contains the Exposuretime in [ms] */
+	double dExposureTime;
+
+	/* flag. If falseish, debugging output is suppressed */
+	int debug;
 
 } sParameterStruct;
 
@@ -81,9 +100,9 @@ int camera_abort(sParameterStruct *);
 
 int camera_setExposure(sParameterStruct *);
 int camera_autosetExposure(sParameterStruct *);
-int camera_config(sParameterStruct *);
+// int camera_config(sParameterStruct *);
 
 // #ifdef __cplusplus
 // }
 // #endif
-// #endif
+#endif

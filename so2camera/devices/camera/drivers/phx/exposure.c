@@ -13,36 +13,33 @@
  */
 #include<stdio.h>
 #include<string.h>
-#include "camera.h"
-#include "configurations.h"
-#include "imageCreation.h"
-#include "log.h"
+#include "../camera.h"
 
 #define MAX_EXPOSURETIME 1004400
 
-int find_ettr(double *, sParameterStruct *, sConfigStruct *);
-int evalHist(sParameterStruct *, sConfigStruct *, int *);
-double getExposureTime(sParameterStruct *, sConfigStruct *);
+int find_ettr(double *, sParameterStruct *);
+int evalHist(sParameterStruct *, int *);
+double getExposureTime(sParameterStruct *);
 
 /* Either return the preset, fixed exposure time or run off into an
  * iterative loop to find a suitable value
  */
-double getExposureTime(sParameterStruct * sSO2Parameters, sConfigStruct * config)
+double getExposureTime(sParameterStruct * sSO2Parameters)
 {
 	double exposure;
 	int status = 0;
-	if (config->dFixTime != 0) {
+	if (sSO2Parameters->dFixTime != 0) {
 		/* Check if exposure time is declared fix in the config file and if so, set it */
-		log_message("Set program to use a fix exposure time, %i", config->dFixTime);
+		printf("Set program to use a fix exposure time, %i \n", sSO2Parameters->dFixTime);
 		if (sSO2Parameters->identifier == 'a')
-			exposure = config->dExposureTime_a;
+			exposure = sSO2Parameters->dExposureTime_a;
 		else
-			exposure = config->dExposureTime_b;
+			exposure = sSO2Parameters->dExposureTime_b;
 	} else {
-		log_message("Find exposure");
-		status = find_ettr(&exposure, sSO2Parameters, config);
+		printf("Find exposure \n");
+		status = find_ettr(&exposure, sSO2Parameters);
 		if (status) {
-			log_error("could not find exposure (ETTR)");
+			fprintf(stderr, "could not find exposure (ETTR) \n");
 			return status;
 		}
 	}
@@ -52,7 +49,7 @@ double getExposureTime(sParameterStruct * sSO2Parameters, sConfigStruct * config
 	return status;
 }
 
-int find_ettr(double *exposure, sParameterStruct * sSO2Parameters, sConfigStruct * config)
+int find_ettr(double *exposure, sParameterStruct * sSO2Parameters)
 {
 	int status = 0;
 	int relative_exposure = 0;	/* 0 good exposure, -1 underexposure, 1 overexposure */
@@ -78,7 +75,7 @@ int find_ettr(double *exposure, sParameterStruct * sSO2Parameters, sConfigStruct
 		calc_mode_speed(*exposure, &actualExposure, &m, speed);
 
 		if (m == lastm && strncmp(speed, lastspeed, 9) == 0) {
-			log_message("change in calculated exposure is lower than the amount that the camera can actually change by, so this is good enough.");
+			printf("change in calculated exposure is lower than the amount that the camera can actually change by, so this is good enough. \n");
 			/* unfortunately, this gets even more complicated
 			 * If this image was overexposed, we are now stuck with blown
 			 * out highlights, or in other words, loss of data. Unfortunately
@@ -87,7 +84,7 @@ int find_ettr(double *exposure, sParameterStruct * sSO2Parameters, sConfigStruct
 			 * to the last known underexposed value.
 			 */
 			if (relative_exposure == 1) {
-				log_message("calculated value was overexposed, reverting to last known underexposed value");
+				printf("calculated value was overexposed, reverting to last known underexposed value \n");
 				*exposure = underexposed;
 			}
 			break;
@@ -96,19 +93,19 @@ int find_ettr(double *exposure, sParameterStruct * sSO2Parameters, sConfigStruct
 		strncpy(lastspeed, speed, 9);
 
 		sSO2Parameters->dExposureTime = *exposure;
-		log_debug("find_ettr: camera_get %f", sSO2Parameters->dExposureTime);
+		printf("find_ettr: camera_get %f \n", sSO2Parameters->dExposureTime);
 		status = camera_setExposure(sSO2Parameters);
 		if (status != 0) {
-			log_error("unable to set exposure time");
+			fprintf(stderr, "unable to set exposure time \n");
 			return status;
 		}
 		status = camera_get(sSO2Parameters, 1);
 		if (status != 0) {
-			log_error("could not get buffer for exposure control");
+			fprintf(stderr, "could not get buffer for exposure control \n");
 			return status;
 		}
 
-		evalHist(sSO2Parameters, config, &relative_exposure);
+		evalHist(sSO2Parameters, &relative_exposure);
 		/* do a bisect to find the optimal exposure time
 		 * if overexposed, jump half the way to the last underexposed value
 		 * if underexposed, jump half way to the last overexposed value
@@ -128,13 +125,13 @@ int find_ettr(double *exposure, sParameterStruct * sSO2Parameters, sConfigStruct
 			if (overexposed > 0) {
 				*exposure = floor((*exposure + overexposed) / 2);
 			} else if (abs(*exposure - MAX_EXPOSURETIME) < 2) {
-				log_message("image is still underexposed, but exposure time has reached its max value (%i of %i)", floor(*exposure), MAX_EXPOSURETIME);
+				printf("image is still underexposed, but exposure time has reached its max value (%i of %i) \n", floor(*exposure), MAX_EXPOSURETIME);
 				relative_exposure = 0;
 			} else {
 				*exposure = (*exposure * 2 < MAX_EXPOSURETIME) ? *exposure * 2 : MAX_EXPOSURETIME;
 			}
 		}
-		log_debug("relative_exposure %i %f", relative_exposure, *exposure);
+		printf("relative_exposure %i %f \n", relative_exposure, *exposure);
 	} while (relative_exposure);
 	return 0;
 }
@@ -152,9 +149,9 @@ int find_ettr(double *exposure, sParameterStruct * sSO2Parameters, sConfigStruct
  *            < 0  underexposed
  *
 */
-int evalHist(sParameterStruct * sSO2Parameters, sConfigStruct * config, int *timeswitch)
+int evalHist(sParameterStruct * sSO2Parameters, int *timeswitch)
 {
-	int bufferlength = config->dBufferlength;
+	int bufferlength = sSO2Parameters->dBufferlength;
 	int histogram[4096] = { 0 };
 	int sum = 0;
 	int i;
@@ -166,7 +163,7 @@ int evalHist(sParameterStruct * sSO2Parameters, sConfigStruct * config, int *tim
 		histogram[temp]++;
 	}
 
-	if (config->debug) {
+	if (sSO2Parameters->debug) {
 		FILE *fd;
 		char fname[1000];
 		sprintf(fname, "exposurehist-%c-%f", sSO2Parameters->identifier, sSO2Parameters->dExposureTime);
@@ -193,7 +190,7 @@ int evalHist(sParameterStruct * sSO2Parameters, sConfigStruct * config, int *tim
 		sum += histogram[i];
 	}
 	if (sum < bufferlength * .0001) {
-		log_debug("image underexposed");
+		printf("image underexposed \n");
 		*timeswitch = -1;
 		return 0;
 	}
@@ -204,7 +201,7 @@ int evalHist(sParameterStruct * sSO2Parameters, sConfigStruct * config, int *tim
 		sum += histogram[i];
 	}
 	if (sum > bufferlength * .0001) {
-		log_debug("image overexposed");
+		printf("image overexposed \n");
 		*timeswitch = 1;
 		return 0;
 	}
@@ -217,7 +214,7 @@ int evalHist(sParameterStruct * sSO2Parameters, sConfigStruct * config, int *tim
 		sum += histogram[i];
 	}
 	if (sum < bufferlength / 2) {
-		log_message("ETTR WARNING: scene might be poorly lit");
+		printf("ETTR WARNING: scene might be poorly lit \n");
 	}
 
 	*timeswitch = 0;
