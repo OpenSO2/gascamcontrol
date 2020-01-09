@@ -23,4 +23,3 @@ correct folder.
 
 This subsystem builds a `webcam-cli` executable that can be used for
 testing.
-cmake -DPYTHON_EXECUTABLE:FILEPATH=`which python` .
