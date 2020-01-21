@@ -16,3 +16,9 @@
 [submodule "so2camera/devices/camerashutter/drivers/serial/pybind11"]
 	path = so2camera/devices/camerashutter/drivers/serial/pybind11
 	url = https://github.com/pybind/pybind11
+[submodule "so2camera/devices/spectrometershutter/drivers/pololu-maestro/pybind11"]
+	path = so2camera/devices/spectrometershutter/drivers/pololu-maestro/pybind11
+	url = https://github.com/pybind/pybind11
+[submodule "so2camera/devices/spectrometer/drivers/mock/pybind11"]
+	path = so2camera/devices/spectrometer/drivers/mock/pybind11
+	url = https://github.com/pybind/pybind11
