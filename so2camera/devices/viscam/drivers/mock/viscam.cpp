@@ -15,7 +15,7 @@ int viscam_init(sVisCamStruct * viscam)
 	/* open mock image */
 	FILE *fid = fopen(VISCAM_MOCK_RAW, "rb");
 	if (!fid) {
-		fprintf(stderr, "image %s could not be opened \n", VISCAM_MOCK_RAW);
+		std::cerr << "image " << VISCAM_MOCK_RAW << " could not be opened\n";
 		return -1;
 	}
 
@@ -27,13 +27,13 @@ int viscam_init(sVisCamStruct * viscam)
 	/* allocate buffer */
 	buffer = (char *)malloc(sizeof(char) * fsize);
 	if (buffer == NULL) {
-		fprintf(stderr, "error allocating enough memory");
+		std::cerr << "error allocating enough memory \n";
 		return -1;
 	}
 
 	stat = fread(buffer, 1, fsize, fid);
 	if (stat != fsize) {
-		fprintf(stderr, "couldn't read mock viscam image");
+		std::cerr << "couldn't read mock viscam image\n";
 		return -1;
 	}
 	fclose(fid);

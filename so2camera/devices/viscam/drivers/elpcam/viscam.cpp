@@ -1,3 +1,4 @@
+#include <iostream>
 #include <opencv/highgui.h>
 #include <time.h>
 #include "../viscam.h"
@@ -30,7 +31,7 @@ int getTime(timeStruct * pTS)
 
 	stat = clock_gettime(CLOCK_REALTIME, &spec);
 	if (stat != 0) {
-		fprintf(stderr, "clock_gettime failed. (posix) \n");
+		std::cerr << "clock_gettime failed. (posix) \n";
 		return 1;
 	}
 
@@ -74,7 +75,7 @@ int viscam_init(sVisCamStruct * viscam)
 	/* open camera */
 	cam = cvCaptureFromCAM(CV_CAP_ANY);
 	if (!cam) {
-		fprintf(stderr, "couldn't open viscam device\n");
+		std::cerr << "couldn't open viscam device\n";
 		return -1;
 	}
 
@@ -87,7 +88,7 @@ int viscam_init(sVisCamStruct * viscam)
 	cvSetCaptureProperty(cam, CV_CAP_PROP_FRAME_HEIGHT, 100000);
 	viscam->width = cvGetCaptureProperty(cam, CV_CAP_PROP_FRAME_WIDTH);
 	viscam->height = cvGetCaptureProperty(cam, CV_CAP_PROP_FRAME_HEIGHT);
-	printf("set viscam to resolution %i x %i\n", viscam->width, viscam->height);
+	std::cout << "set viscam to resolution %i x %i\n", viscam->width, viscam->height;
 
 	// viscam->timestampBefore = (timeStruct *) malloc(sizeof(timeStruct));
 	// viscam->timestampAfter = (timeStruct *) malloc(sizeof(timeStruct));
@@ -118,7 +119,7 @@ int viscam_init(sVisCamStruct * viscam)
 		mean_exposure += (getTimeStamp() - start) / noofmeanframes;
 	}
 
-	printf("viscam mean exposure is %lu \n", mean_exposure);
+	std::cout << "viscam mean exposure is " << mean_exposure << "\n";
 
 	return 0;
 }
@@ -142,14 +143,14 @@ int viscam_get(sVisCamStruct * viscam)
 		start = getTimeStamp();
 		frame = cvQueryFrame(cam);
 		if (!frame) {
-			fprintf(stderr, "couldn't get a viscam frame\n");
+			std::cerr << "couldn't get a viscam frame\n";
 			return -2;
 		}
 		diff = getTimeStamp() - start;
 
-		printf("time to get viscam image: %lu \n", diff);
+		std::cout << "time to get viscam image: " << diff << "\n";
 	}
-	printf("discarded %i viscam frames \n", i);
+	std::cout << "discarded " << i << " viscam frames \n";
 
 	// stat = getTime(viscam->timestampAfter);
 	// if (stat) {
