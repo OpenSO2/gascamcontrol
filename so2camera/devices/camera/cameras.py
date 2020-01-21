@@ -1,6 +1,28 @@
 """Implement pluggable interface for UV dual view cameras."""
 import logging
+import configargparse
 from .camera import Camera
+
+
+def _setup():
+    """Do setup that needs to happen once on import."""
+    parser = configargparse.get_argument_parser()
+
+    # fprintf(stderr, "   --noofimages n                Only save n UV image sets and exit\n");
+
+    # Intervall (in images) between dark images
+    # a dark image is taken every N images (int, >0)
+    parser.add("--darkframeintervall", default=1000)
+
+
+    # camera_drivers = "mock, mock, mock"
+    # camera_identifiers = "a, b, c"
+
+    # wipe function to make sure it only runs once
+    _setup.__code__ = (lambda: None).__code__
+
+
+_setup()
 
 
 class Cameras():

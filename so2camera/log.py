@@ -6,7 +6,38 @@ from contextlib import contextmanager
 import ctypes
 import io
 import tempfile
-from conf import options as settings
+import configargparse
+import conf
+
+
+def _setup():
+    """Do setup that needs to happen once on import."""
+    parser = configargparse.get_argument_parser()
+
+    parser.add("--debug", help="Set default log level to debug")
+    parser.add("--logfile", default="so2-camera.log", help="Logfile")
+
+    # wipe function to make sure it only runs once
+    _setup.__code__ = (lambda: None).__code__
+
+
+_setup()
+
+
+class StreamToLogger():
+    """Fake file-like stream object that redirects writes to a logger instance."""
+    # https://www.electricmonk.nl/log/2011/08/14/redirect-stdout-and-stderr-to-a-logger-in-python/
+    def __init__(self, logger, log_level=logging.INFO):
+        self.logger = logger
+        self.log_level = log_level
+        self.linebuf = ''
+
+    def write(self, buf):
+        for line in buf.rstrip().splitlines():
+            self.logger.log(self.log_level, line.rstrip())
+
+    def flush(self, buf):
+        self.write(buf)
 
 
 @contextmanager
@@ -76,18 +107,41 @@ def stdout_redirector():
         logger.error(streamerr.getvalue().decode('utf-8').rstrip())
 
 
+@contextmanager
+def stdout_redirector():
+    try:
+        pass
+    finally:
+        pass
+
+
 class Log():
     def __init__(self, loggername):
         self.loggername = loggername
-        self.logger = logging.getLogger(loggername)
+        self.logger = logging.getLogger(self.loggername)
         self.error = self.logger.error
         self.warning = self.logger.warning
         self.info = self.logger.info
+        self.debug = self.logger.debug
+        self.options = conf.Conf().options
         self.route_to_file()
+        self.route_print()
+
+    def route_print(self):
+        # stdout_logger = logging.getLogger('STDOUT')
+        stdout_logger = logging.getLogger(self.loggername)
+        sl = StreamToLogger(stdout_logger, logging.INFO)
+        sys.stdout = sl
+
+        # stderr_logger = logging.getLogger('STDERR')
+        stderr_logger = logging.getLogger(self.loggername)
+        sl = StreamToLogger(stderr_logger, logging.ERROR)
+        sys.stderr = sl
 
     def route_to_file(self):
         """Route logs to logfile (even debug messages)."""
-        logfile = settings["logfile"]
+        logfile = self.options.logfile
+        # logfile = "out.log"
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         filehandle = logging.FileHandler(logfile)

@@ -5,6 +5,28 @@ from concurrent.futures import ThreadPoolExecutor
 import datetime
 import logging
 import numpy as np
+import configargparse
+
+
+def _setup():
+    """Do setup that needs to happen once on import."""
+    parser = configargparse.get_argument_parser()
+
+    # parser.add("--InterFrameDelay", default=10,
+    #            help="delay between two frames in ms")
+    # parser.add("--FixTime", default=0,
+    #            help="fix exposure time 1 = yes 0 = no")
+
+    # contains the Exposuretime in [us]
+    # min = 2.4 max = 1004400
+    # parser.add("--ExposureTime_a", default=1004400)
+    # parser.add("--ExposureTime_b", default=1004400)
+
+    # wipe function to make sure it only runs once
+    _setup.__code__ = (lambda: None).__code__
+
+
+_setup()
 
 
 class Camera():

@@ -1,10 +1,38 @@
-"""Manage spectrometer shutter.
-"""
+"""Manage spectrometer shutter."""
 import importlib
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import logging
-from log import stdout_redirector
+import configargparse
+
+
+def _setup():
+    """Do setup that needs to happen once on import."""
+    parser = configargparse.get_argument_parser()
+
+    # spectrometer shutter device descriptor
+    # eg.
+    # windows
+    #     \\\\.\\COM6
+    #     \\\\.\\USBSER000
+    # linux
+    #     /dev/serial/by-id/usb-Pololu_Corporation_Pololu_Micro_Maestro_6-Servo_
+    #                       Controller_00135615-if00";
+    #     /dev/ttyACM3
+    # parser.add("--spectrometer_shutter_device",
+    #            default="/dev/serial/by-id/usb-Pololu_Corporation"
+    #            "_Pololu_Micro_Maestro_6-Servo_Controller_00135615-if00",
+    #            help="spectrometer shutter device descriptor")
+
+    # spectrometer shutter device channel - used for the pololu maestro
+    # servo controller
+    # parser.add("--spectrometer_shutter_channel", default=5)
+
+    # wipe function to make sure it only runs once
+    _setup.__code__ = (lambda: None).__code__
+
+
+_setup()
 
 
 class Spectrometershutter():
@@ -31,9 +59,6 @@ class Spectrometershutter():
 
     async def start(self):
         """Initiate spectrometer shutter device."""
-        print("start")
-        print("inited", self.spectrometershutter,  self.spectrometershutter.device)
-        # with stdout_redirector():
         st = await self.loop.run_in_executor(ThreadPoolExecutor(),
                                              self.driver.init, self.spectrometershutter)
         print("inited", self.spectrometershutter,  self.spectrometershutter.device)
@@ -47,13 +72,12 @@ class Spectrometershutter():
     async def setState(self, state):
         """ """
         print("set")
-        with stdout_redirector():
-            await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                            self.driver.setState,
-                                            self.spectrometershutter, state)
+        await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                        self.driver.setState,
+                                        self.spectrometershutter, state)
 
     async def stop(self):
         """Stop spectrometer shutter and release device."""
-        with stdout_redirector():
-            await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                            self.driver.uninit, self.spectrometershutter)
+        await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                        self.driver.uninit,
+                                        self.spectrometershutter)

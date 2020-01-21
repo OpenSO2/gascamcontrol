@@ -4,11 +4,27 @@ import importlib
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import logging
-from log import stdout_redirector
+import configargparse
+
+
+def _setup():
+    """Do setup that needs to happen once on import."""
+    parser = configargparse.get_argument_parser()
+
+    # filterwheel_device = \\\\.\\COM22
+    # parser.add("--camerashutter_device", default="/dev/serial/by-id/usb"
+    #            "-FTDI_FT232R_USB_UART_A402X19O-if00-port0",
+    #            help="camera shutter device descriptor")
+
+    # wipe function to make sure it only runs once
+    _setup.__code__ = (lambda: None).__code__
+
+
+_setup()
 
 
 class Camerashutter():
-    """
+    """Device to block light to the camera(s) for dark image correction.
 
     Delegates the actual implementation to the drivers in ./drivers.
     """

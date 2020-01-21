@@ -41,7 +41,7 @@ int spectrometershutter_init(sSpectrometershutter * config)
 
 	fd = open(config->device, O_RDWR | O_NOCTTY);
 	if (fd == -1) {
-		std:cerr << "could not open spectrometer_shutter device\n";
+		std::cerr << "could not open spectrometer_shutter device\n";
 		return 1;
 	}
 

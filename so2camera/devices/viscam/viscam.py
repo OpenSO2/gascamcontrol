@@ -8,6 +8,19 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import logging
 import numpy as np
+import configargparse
+
+
+def _setup():
+    """Do setup that needs to happen once on import."""
+    parser = configargparse.get_argument_parser()
+    parser.add("--viscam_driver", default="mock",
+               help="which viscam driver to use")
+    # wipe function to make sure it only runs once
+    _setup.__code__ = (lambda: None).__code__
+
+
+_setup()
 
 
 class Viscam():

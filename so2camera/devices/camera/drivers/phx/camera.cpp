@@ -69,13 +69,13 @@ int camera_autosetExposure(sParameterStruct * sSO2Parameters)
   sSO2Parameters->dExposureTime = sSO2Parameters->exposuretime;  // FIXME: thats stupid. dont be stupid.
 	status = getExposureTime(sSO2Parameters);
 	if (status) {
-		std:cerr << "exposure time couldn't be retrieved\n";
+		std::cerr << "exposure time couldn't be retrieved\n";
 		return status;
 	}
 
 	status = camera_setExposure(sSO2Parameters);
 	if (status) {
-		std:cerr << "exposure time wasn't set\n";
+		std::cerr << "exposure time wasn't set\n";
 		return status;
 	}
 
@@ -92,15 +92,15 @@ int camera_setExposure(sParameterStruct * sSO2Parameters)
 
 	/* before doing anything check if exposure time is within the limits */
 	if (exposureTime < 2.4 || exposureTime > 1004400.) {
-		std:cerr << "Exposure time declared in Configfile is out of range: 2.4us < Exposure Time > 1004.4ms";
+		std::cerr << "Exposure time declared in Configfile is out of range: 2.4us < Exposure Time > 1004.4ms";
 		return PHX_ERROR_OUT_OF_RANGE;
 	}
 	calc_mode_speed(exposureTime, &actualExposureTime, &m, speed);
 	sSO2Parameters->dExposureTime = actualExposureTime;	/* update struct to the actual exposure time */
 	if (m == 'S') {
-		std:cerr << "Camera " << sSO2Parameters->identifier << " uses electronic shutter. Exposure was set to approx. " << exposureTime << " us which calculates to " << actualExposureTime << "\n";
+		std::cerr << "Camera " << sSO2Parameters->identifier << " uses electronic shutter. Exposure was set to approx. " << exposureTime << " us which calculates to " << actualExposureTime << "\n";
 	} else {
-		std:cerr << "Camera " << sSO2Parameters->identifier << " uses frameblanking. Exposure was set to approx. " << exposureTime << " us which calculates to " << actualExposureTime  << "\n";
+		std::cerr << "Camera " << sSO2Parameters->identifier << " uses frameblanking. Exposure was set to approx. " << exposureTime << " us which calculates to " << actualExposureTime  << "\n";
 	}
 
 	eStat = set_mode_speed(sSO2Parameters->hCamera, m, speed);
@@ -135,13 +135,13 @@ int set_mode_speed(tHandle hCamera, char m, char speed[9])
 
 	eStat = sendMessage(hCamera, (ui8 *) mode);
 	if (PHX_OK != eStat) {
-		std:cerr << "Setting camera mode failed\n";
+		std::cerr << "Setting camera mode failed\n";
 		return eStat;
 	}
 
 	eStat = sendMessage(hCamera, (ui8 *) speed);
 	if (PHX_OK != eStat) {
-		std:cerr << "setting shutter to " << speed << " failed\n";
+		std::cerr << "setting shutter to " << speed << " failed\n";
 		return eStat;
 	}
 	return eStat;
@@ -170,7 +170,7 @@ int camera_init(sParameterStruct * sSO2Parameters)
 		return eStat;
 	}
 
-	std:cout << "configuring of the frame grabber was successful\n";
+	std::cout << "configuring of the frame grabber was successful\n";
 
 	return setup_camera(sSO2Parameters);
 }

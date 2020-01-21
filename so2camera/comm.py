@@ -2,6 +2,19 @@ import asyncio
 import logging
 import aiohttp
 from aiohttp import web
+import configargparse
+
+
+def _setup():
+    """Do setup that needs to happen once on import."""
+    parser = configargparse.get_argument_parser()
+    parser.add("--port", default="8080", help="Port for websocket interface.")
+
+    # wipe function to make sure it only runs once
+    _setup.__code__ = (lambda: None).__code__
+
+
+_setup()
 
 
 class Comm():
