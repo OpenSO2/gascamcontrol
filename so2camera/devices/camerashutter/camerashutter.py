@@ -1,7 +1,4 @@
-"""Manage viscam.
-
-Viscam are auxilary visual cameras (think cheap webcams) that are
-not part of the main measurement.
+"""
 """
 import importlib
 import asyncio

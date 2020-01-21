@@ -1,4 +1,4 @@
-"""Command line viscam program for testing and demonstration."""
+"""Command line camera shutter program for testing and demonstration."""
 import sys
 import os
 import asyncio
@@ -16,7 +16,7 @@ sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 from devices.camerashutter.camerashutter import Camerashutter
 
 
-async def setShutter(driver, state, device):
+async def set_shutter(driver, state, device):
     """"""
     async with Camerashutter(driver=driver, device=device) as camshut:
         await camshut.setState(state)
@@ -30,8 +30,9 @@ def main():
                         help="Device driver to use (see ./drivers)")
     options = parser.parse_args()
     loop = asyncio.get_event_loop()
-    device = "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A402X19O-if00-port0"
-    loop.run_until_complete(setShutter(options.driver, options.state, device))
+    device = ("/dev/serial/by-id/usb-Pololu_Corporation_"
+              "Pololu_Micro_Maestro_6-Servo_Controller_00135615-if00")
+    loop.run_until_complete(set_shutter(options.driver, options.state, device))
 
 
 if __name__ == "__main__":
