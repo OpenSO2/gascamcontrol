@@ -5,8 +5,6 @@
 
 std::vector<short> getBuffer(sParameterStruct * vc);
 std::vector<short> getBuffer(sParameterStruct * vc){
-	// vc->stBufferSize = 2752512;
-	fprintf(stderr, "vc->stBufferSize %i %c %i %i\n", vc->stBufferSize, vc->identifier, (int)vc->fBufferReady, sizeof(short));
 	// fixme!
 	return std::vector<short>(vc->stBuffer, vc->stBuffer + vc->stBufferSize/sizeof(short));
 }
@@ -14,12 +12,12 @@ std::vector<short> getBuffer(sParameterStruct * vc){
 PYBIND11_MODULE(camera, m) {
     m.doc() = "Manage camera and abstract C nastyness.";
 
-    m.def("init", &camera_init, "Initialize camera.");
-		m.def("get", &camera_get, "Capture a frame from device and places stBuffer in camera.stBuffer");
-		m.def("uninit", &camera_uninit, "Stop device and frees ressources.");
-		m.def("abort", &camera_abort, "Abort capture.");
-		m.def("setExposure", &camera_setExposure, "");
-		m.def("autosetExposure", &camera_autosetExposure, "");
+    m.def("init", &camera_init, "Initialize camera.", pybind11::call_guard<pybind11::scoped_ostream_redirect, pybind11::scoped_estream_redirect>());
+		m.def("get", &camera_get, "Capture a frame from device and places stBuffer in camera.stBuffer", pybind11::call_guard<pybind11::scoped_ostream_redirect, pybind11::scoped_estream_redirect>());
+		m.def("uninit", &camera_uninit, "Stop device and frees ressources.", pybind11::call_guard<pybind11::scoped_ostream_redirect, pybind11::scoped_estream_redirect>());
+		m.def("abort", &camera_abort, "Abort capture.", pybind11::call_guard<pybind11::scoped_ostream_redirect, pybind11::scoped_estream_redirect>());
+		m.def("setExposure", &camera_setExposure, "", pybind11::call_guard<pybind11::scoped_ostream_redirect, pybind11::scoped_estream_redirect>());
+		m.def("autosetExposure", &camera_autosetExposure, "", pybind11::call_guard<pybind11::scoped_ostream_redirect, pybind11::scoped_estream_redirect>());
 
     pybind11::class_<sParameterStruct>(m, "camera")
         .def(pybind11::init<>())

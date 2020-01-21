@@ -2,17 +2,17 @@
 import logging
 from .camera import Camera
 
-logger = logging.getLogger('myLog')
-
 
 class Cameras():
     """Manage and sync dual view cameras."""
+
     def __init__(self):
         self._running = False
         self._issetup = False
         self.camera1 = None
         self.camera2 = None
-        logger.info("__init__ cam done")
+        self.logger = logging.getLogger('myLog')
+        self.logger.info("__init__ cam done")
 
     @property
     def running(self):
@@ -30,18 +30,18 @@ class Cameras():
     def issetup(self, value):
         self._issetup = value
 
-    async def init(self, loop):
-        logger.info("init cam")
-        self.camera1 = Camera("a")
+    async def init(self):
+        self.logger.info("init cam")
+        self.camera1 = Camera("mock", "a")
         self.camera2 = None
         self.issetup = True
 
-        await self.camera1.init(loop)
-        logger.info("init cam done")
+        await self.camera1.start()
+        self.logger.info("init cam done 2")
 
-    async def start(self, loop):
+    async def start(self):
         self.running = True
-        img = await self.camera1.get(loop)
+        img = await self.camera1.get()
         return img
 
     def __enter__(self):

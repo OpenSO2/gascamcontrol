@@ -84,15 +84,11 @@ int camera_uninit(sParameterStruct * sSO2Parameters)
 
 int camera_get(sParameterStruct * sSO2Parameters, int waiter)
 {
-
-	fprintf(stderr, "! Mocking camera ! No real measurements are taken\n");
+	std::cout << "! Mocking camera ! No real measurements are taken\n";
 	const char *filename;
 	short *stBuffer = NULL;
 	int bufferSet = 0;
 	int stBufferSize = 0;
-
-	printf("! Mocking camera ! No real measurements are taken\n");
-	fprintf(stderr, "! Mocking camera ! No real measurements are taken\n");
 
 	if (sSO2Parameters->identifier == 'a') {
 		bufferSet = bufferSetA;
@@ -103,12 +99,11 @@ int camera_get(sParameterStruct * sSO2Parameters, int waiter)
 		bufferSetB = 1;
 		filename = sSO2Parameters->dark ? CAMERA_MOCK_B_RAW_DARK : CAMERA_MOCK_B_RAW;
 	}
-	fprintf(stderr, "1");
+
 	if (bufferSet == 1)
 		free(sSO2Parameters->stBuffer);
 
 	stBuffer = getBufferFromFile(filename, 0, &stBufferSize);
-	fprintf(stderr, "== stBufferSize %i \n", stBufferSize);
 
 	// FIXME: Handle Error
 	// if (stBufferSize) {
@@ -119,13 +114,11 @@ int camera_get(sParameterStruct * sSO2Parameters, int waiter)
 		sSO2Parameters->width = 1344;
 		sSO2Parameters->height = 1024;
 
-		fprintf(stderr, "\nstBuffer: stBufferSize %i\n\n", stBufferSize);
-
 		return 0;
 	}
-	if(stBuffer == NULL)
-		fprintf(stderr, "stBuffer is NULL\n");
-	fprintf(stderr, "Failed to fill image buffer (size %i)\n", stBufferSize);
+	if(stBuffer == NULL) {
+		std::cout << "Failed to fill image buffer (size " << stBufferSize << ")\n";
+	}
 	return 1;
 }
 

@@ -2,9 +2,9 @@
 import importlib
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import datetime
 import logging
 import numpy as np
-from log import stdout_redirector
 
 
 class Camera():
@@ -20,7 +20,7 @@ class Camera():
         self.driver = importlib.import_module(driver)
         self.camera = self.driver.camera()
 
-        print(f"identifier '{self.identifier}'")
+        self.logger.debug("identifier %s", self.identifier)
         self.camera.identifier = self.identifier
         self.camera.exposuretime = 250000  # start exposure time
 
@@ -33,41 +33,38 @@ class Camera():
     async def start(self):
         """Initiate camera device."""
         self.logger.debug("init camera %s", self.identifier)
-        with stdout_redirector():
-            print("stdout_redirector done")
-            await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                            self.driver.init, self.camera)
+        await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                        self.driver.init, self.camera)
         self.logger.debug("init camera done.")
 
-        self.logger.debug("camera set camera autoset exposure")
-        print("camera set camera autoset exposure")
         # FIXME: Im not sure this should be here... maybe own method?
-        with stdout_redirector():
-            await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                            self.driver.autosetExposure,
-                                            self.camera)
+        await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                        self.driver.autosetExposure,
+                                        self.camera)
         self.logger.debug("camera set autoset exposure done, camera ready")
-        print("camera set autoset exposure done, camera ready")
+
         return self
 
     async def get(self):
         """Get a single image buffer."""
-        # with stdout_redirector():
-        print("async def get")
         stat = await self.loop.run_in_executor(ThreadPoolExecutor(),
                                                self.driver.get,
                                                self.camera, 1)
-        print(f"set.driver.get {stat}")
-        print("got...", self.camera.identifier, self.camera.stBufferSize,
-              self.camera.height, self.camera.width)
+
+        self.logger.debug("set.driver.get %s", stat)
+        self.logger.debug("got... %s %i %i %i", self.camera.identifier,
+                          self.camera.stBufferSize,
+                          self.camera.height, self.camera.width)
 
         shape = (self.camera.height, self.camera.width, 1)
-        return np.reshape(np.array(self.camera.buffer), shape).astype(np.uint16)
+        img = np.reshape(np.array(self.camera.buffer), shape).astype(np.uint16)
+        meta = {}
+        meta["date"] = datetime.datetime.now()
+        return img, meta
 
     async def stop(self):
         """Stop camera and release device."""
-        print("stop")
-        with stdout_redirector():
-            await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                            self.driver.uninit, self.camera)
-        print("stoped")
+        self.logger.debug("stop camera")
+        await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                        self.driver.uninit, self.camera)
+        self.logger.debug("stoped camera")

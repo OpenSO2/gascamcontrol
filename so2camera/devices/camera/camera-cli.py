@@ -4,9 +4,9 @@ import os
 import asyncio
 from argparse import ArgumentParser
 import cv2
-
-import logging
-logging.basicConfig(filename='example.log', level=logging.DEBUG)
+# 
+# import logging
+# logging.basicConfig(filename='example.log', level=logging.DEBUG)
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 PACKAGE_PARENT = '../..'
@@ -22,7 +22,7 @@ async def capture(driver, filename, identifier):
     """Capture image from viscam and save to png or raw."""
     async with Camera(driver=driver, identifier=identifier) as camera:
         print("cli inited, get image")
-        img = await camera.get()
+        img, meta = await camera.get()
         print("cli got image")
         if ".png" in filename:
             # upsample image to use full 16bit range (the image will be very
