@@ -1,23 +1,17 @@
-from aiohttp import web
-import aiohttp
-# from concurrent.futures import ThreadPoolExecutor
 import asyncio
 import logging
+import aiohttp
+from aiohttp import web
 
-a = {
-    'app': None
-}
 
 class Comm():
     def __init__(self):
         self.app = None
         self.logger = logging.getLogger('myLog')
-
-    websockets = []
+        self.loop = asyncio.get_event_loop()
+        self.websockets = []
 
     async def websocket_handler(self, request):
-        logger = logging.getLogger('myLog')
-
         websocket = web.WebSocketResponse()
         await websocket.prepare(request)
         self.websockets.append(websocket)
@@ -28,23 +22,23 @@ class Comm():
                     await websocket.close()
                 else:
                     ans = msg.data + '/answer'
-                    logger.info("got msg %s, answered %s", msg.data, ans)
+                    self.logger.info("got msg %s, answered %s", msg.data, ans)
                     # await websocket.send_str(ans)
             elif msg.type == aiohttp.WSMsgType.ERROR:
-                logger.info('ws connection closed with exception %s',
-                            websocket.exception())
+                self.logger.info('ws connection closed with exception %s',
+                                 websocket.exception())
 
-        logger.info('websocket connection closed')
+        self.logger.info('websocket connection closed')
 
         return websocket
 
-    async def send(self, img):
+    async def send(self, item):
         for websocket in self.websockets:
             # if "send" in websocket:
             # await websocket.send_str(f"img shape {img.shape}")
             # await websocket.send_bytes(img.tobytes())
-            logger = logging.getLogger('myLog')
-            logger.info("send data")
+            self.logger.info("send data")
+            img = item.data
             img *= 16
             # logger.info(str(img.tolist()))
             await websocket.send_bytes(img.tobytes())
@@ -60,8 +54,7 @@ class Comm():
 
         self.logger.info("run comm")
 
-        loop = asyncio.get_event_loop()
         runner = web.AppRunner(app)
-        loop.run_until_complete(runner.setup())
+        self.loop.run_until_complete(runner.setup())
         site = web.TCPSite(runner)
-        loop.run_until_complete(site.start())
+        self.loop.run_until_complete(site.start())
