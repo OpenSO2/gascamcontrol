@@ -1,5 +1,6 @@
-"""Implement pluggable interface for UV dual view cameras."""
+"""Implement an interface for multi view cameras."""
 import logging
+import asyncio
 import configargparse
 from .camera import Camera
 
@@ -7,16 +8,6 @@ from .camera import Camera
 def _setup():
     """Do setup that needs to happen once on import."""
     parser = configargparse.get_argument_parser()
-
-    # fprintf(stderr, "   --noofimages n                Only save n UV image sets and exit\n");
-
-    # Intervall (in images) between dark images
-    # a dark image is taken every N images (int, >0)
-    parser.add("--darkframeintervall", default=1000)
-
-
-    # camera_drivers = "mock, mock, mock"
-    # camera_identifiers = "a, b, c"
 
     # wipe function to make sure it only runs once
     _setup.__code__ = (lambda: None).__code__
@@ -26,48 +17,39 @@ _setup()
 
 
 class Cameras():
-    """Manage and sync dual view cameras."""
+    """Manage and sync multi view cameras."""
 
     def __init__(self):
-        self._running = False
-        self._issetup = False
-        self.camera1 = None
-        self.camera2 = None
+        self.cameras = []
         self.logger = logging.getLogger('myLog')
-        self.logger.info("__init__ cam done")
+        self.options = configargparse.options
 
-    @property
-    def running(self):
-        return self._running
-
-    @running.setter
-    def running(self, value):
-        self._running = value
-
-    @property
-    def issetup(self):
-        return self._issetup
-
-    @issetup.setter
-    def issetup(self, value):
-        self._issetup = value
+        # figure out how many cameras we have to initialize
+        self.cameras = [Camera(driver=driver, identifier=identifier)
+                        for (driver, identifier)
+                        in zip(self.options.camera_drivers,
+                               self.options.camera_identifiers)]
 
     async def init(self):
-        self.logger.info("init cam")
-        self.camera1 = Camera("mock", "a")
-        self.camera2 = None
-        self.issetup = True
+        """Initialize all cameras."""
+        camera_tasks = [cameras.init() for cameras in self.cameras]
+        self.cameras = await asyncio.gather(*camera_tasks)
+        self.logger.info("init cams done")
 
-        await self.camera1.start()
-        self.logger.info("init cam done 2")
+    async def get(self):
+        """Get a full set of images by scheduling get from all concurrently."""
+        camera_tasks = [cameras.get() for cameras in self.cameras]
+        return await asyncio.gather(*camera_tasks)
 
-    async def start(self):
-        self.running = True
-        img = await self.camera1.get()
-        return img
+    async def uninit(self):
+        """Unitialize all cameras."""
+        camera_tasks = [cameras.uninit() for cameras in self.cameras]
+        self.cameras = await asyncio.gather(*camera_tasks)
+        self.logger.info("uninit cams done")
 
-    def __enter__(self):
+    def __aenter__(self):
+        await self.init()
         return self
 
-    def __exit__(self, *args):
-        pass
+    def __aexit__(self, *args):
+        await self.uninit()
