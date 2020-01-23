@@ -3,7 +3,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import cv2
 import configargparse
-import log
+import logging
 import conf
 
 
@@ -43,7 +43,7 @@ class Io():
 
     def __init__(self):
         self.loop = asyncio.get_event_loop()
-        self.logging = log.Log('myLog')
+        self.logging = logging.getLogger("myLog")
         self.options = conf.Conf().options
 
 
