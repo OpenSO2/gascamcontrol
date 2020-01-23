@@ -2,6 +2,7 @@
 import logging
 import curses
 import conf
+from processingqueue import Queue
 
 
 class CursesHandler(logging.Handler):
@@ -29,12 +30,14 @@ class Tui():
         self.padding = None
         self.stdscr = None
         self.logger = logging.getLogger('myLog')
+        self.logging = self.logger
         self._status_win = None
+        self.queue = Queue()
 
-    # def __enter__(self):
     def startup(self):
-        # return self
-        stdscr = curses.initscr()
+        curses.wrapper(self.setupscreen)
+
+    def setupscreen(self, stdscr):
         self.stdscr = stdscr
         curses.noecho()
         curses.cbreak()
@@ -46,7 +49,6 @@ class Tui():
 
         stdscr.keypad(True)
         stdscr.nodelay(1)
-        # stdscr.box()
         title = "SO2 Camera"
         stdscr.addstr(0, (maxx - len(title)) // 2, title)
         stdscr.refresh()
@@ -73,8 +75,7 @@ class Tui():
         self.status_win()
 
     def update(self):
-        # return
-        self.handle_input()
+        self.status_win()
 
     def handle_input(self):
         # return
@@ -143,22 +144,20 @@ class Tui():
         win.refresh()
 
     def status_win(self):
-        height = self.maxy // 2 - self.padding
-        width = (self.maxx) // 2 - self.padding
-        offset_y = self.padding
-        offset_x = self.padding + self.maxx // 2
-        win = curses.newwin(height, width, offset_y, offset_x)
-        title = "Status"
+        if not self._status_win:
+            height = self.maxy // 2 - self.padding
+            width = (self.maxx) // 2 - self.padding
+            offset_y = self.padding
+            offset_x = self.padding + self.maxx // 2
+
+            self._status_win = curses.newwin(height, width, offset_y, offset_x)
+            title = "Status"
+            self._status_win.box()
+            self._status_win.addstr(0, (offset_y + width - len(title)) // 2, title)
         status = "running"
-        win.box()
-        win.addstr(0, (offset_y + width - len(title)) // 2, title)
-        win.addstr(1, 1, f"Aquisition: {status}")
-        win.addstr(2, 1, f"Loglevel: {logging.getLevelName(self.loglevel)}")
-        win.refresh()
-    #
-    # def __exit__(self, *args):
-    #     return
-    #     curses.curs_set(1)
-    #     curses.nocbreak()
-    #     curses.echo()
-    #     curses.endwin()
+        self._status_win.addstr(1, 1, f"Aquisition: {status}")
+        self._status_win.addstr(2, 1, f"Loglevel: {logging.getLevelName(self.loglevel)}")
+        self._status_win.addstr(3, 1, f"Queue Fill level: {len(self.queue)}")
+        self._status_win.refresh()
+        self.stdscr.refresh()
+
