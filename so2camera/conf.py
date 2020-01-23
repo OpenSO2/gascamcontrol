@@ -89,6 +89,12 @@ class Conf():
 
         self.options, _ = self.parser.parse_known_args()
 
+        # validate
+        # TODO:
+        #   - #camera_drivers = #camera_identifiers
+
+        configargparse.options = self.options
+
     def write_config(self, namespace, filename):
         """Write config file from current config options."""
         self.parser.write_config_file(namespace, filename,
