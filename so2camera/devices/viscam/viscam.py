@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 import logging
 import numpy as np
 import configargparse
+import conf
 
 
 def _setup():
@@ -29,8 +30,9 @@ class Viscam():
     Delegates the actual implementation to the drivers in ./drivers.
     """
 
-    def __init__(self, driver):
-        self.drivername = driver
+    def __init__(self, driver=None):
+        self.options = conf.Conf().options
+        self.drivername = driver or self.options.viscam_driver
         self.loop = asyncio.get_event_loop()
         self.logging = logging.getLogger('myLog')
         visdriv = f"devices.viscam.drivers.{self.drivername}.viscam"
