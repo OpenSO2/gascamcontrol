@@ -3,7 +3,7 @@ import sys
 import os
 import asyncio
 import csv
-from argparse import ArgumentParser
+import configargparse
 
 PACKAGE_PARENT = '../..'
 TOPLEVELPATH = os.path.realpath(os.path.join(os.getcwd(),
@@ -14,32 +14,31 @@ sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 from devices.spectrometer.spectrometer import Spectrometer
 
 
-async def get_spectrum(driver, exposure, scans, outfile):
-    """Set shutter to state."""
+async def get_spectrum(driver, exposure, outfile):
+    """Set single uncorrected spectrum."""
     async with Spectrometer(driver=driver) as spectrometer:
-        spectrum = await spectrometer.get(exposure, scans)
+        wvl, spectrum = await spectrometer.get(exposure)
 
         if outfile:
             with open(outfile, 'w') as csvfile:
                 writer = csv.writer(csvfile)
-                for data in spectrum:
+                for data in zip(wvl, spectrum):
                     writer.writerow(data)
         else:
-            print('\n'.join([f"{s[0]} {s[1]}" for s in spectrum]))
+            print('\n'.join([f"{s[0]} {s[1]}" for s in zip(wvl, spectrum)]))
 
 
 def main():
     """Run main event loop."""
-    parser = ArgumentParser(description='Spectrometer shutter example program')
-    parser.add_argument("exposure", default=1E6, type=int, help="Exposure time in ms")
-    parser.add_argument("scans", default=1, type=int, help="Number of scans")
+    parser = configargparse.get_argument_parser()
+    parser.description = 'Spectrometer example program'
+    parser.add_argument("--exposure", default=1E6, type=int,
+                        help="Exposure time in ms")
     parser.add_argument("--outfile", help="File to save spectrum to")
-    parser.add_argument("--driver", default="mock",
-                        help="Device driver to use (see ./drivers)")
     options = parser.parse_args()
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(get_spectrum(options.driver, options.exposure, options.scans,
-                                         options.outfile))
+    loop.run_until_complete(get_spectrum(options.spectrometer_driver,
+                                         options.exposure, options.outfile))
 
 
 if __name__ == "__main__":

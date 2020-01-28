@@ -2,6 +2,7 @@ import signal
 import sys
 import os
 import asyncio
+import configargparse
 import matplotlib.pyplot as plt
 
 PACKAGE_PARENT = '../..'
@@ -17,8 +18,8 @@ EXPOSURE = 4000000
 SCANS = 1
 
 
-
 def shutdown():
+    """Kill program and cleanup."""
     loop = asyncio.get_event_loop()
     pending = asyncio.Task.all_tasks()
     for task in pending:
@@ -29,7 +30,8 @@ def shutdown():
     sys.exit(0)
 
 
-async def plot():
+async def plot(driver):
+    """Plot indefinitely."""
     plt.ion()
     fig = plt.figure()
 
@@ -42,9 +44,9 @@ async def plot():
 
     axplt = False
 
-    async with Spectrometer(driver="oceanoptics") as spectrometer:
+    async with Spectrometer(driver) as spectrometer:
         while 1:  # plot indefinitely
-            wvl, data = await spectrometer.get(EXPOSURE, SCANS)
+            wvl, data = await spectrometer.get(EXPOSURE)
             if not axplt:
                 axplt = ax.plot(wvl, data, 'r-')[0]
             axplt.set_ydata(data)
@@ -53,10 +55,16 @@ async def plot():
 
 
 def main():
+    """Startup program."""
     # handle ctrl+c
     signal.signal(signal.SIGINT, lambda _signal, _frame: shutdown())
+
+    parser = configargparse.get_argument_parser()
+    parser.description = 'Spectrometer live viewer'
+    options = parser.parse_args()
+
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(plot())
+    loop.run_until_complete(plot(options.spectrometer_driver))
 
 
 if __name__ == "__main__":

@@ -19,9 +19,9 @@ def get(spectro):
     spectro.lastSpectrum = SPEC.intensities()
 
 
-def uninit(spectro):
-    pass
-
+def uninit(_spectro):
+    global SPEC
+    SPEC = None
 
 
 class spectrometer():

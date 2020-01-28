@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <iostream>
 #include "../spectrometer.h"
 
 static double *wavelengths = NULL;
