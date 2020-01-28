@@ -1,9 +1,9 @@
 """Handle I/O interactions."""
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
-import cv2
-import configargparse
 import logging
+from concurrent.futures import ThreadPoolExecutor
+import configargparse
+import cv2
 import conf
 
 
@@ -29,7 +29,7 @@ def _setup():
     parser.add("--imagePath", default="images",
                help="Path to images and logs - can be either a relative path "
                     "from the working directory or an absolute path")
-    # fprintf(stderr, "   --png-only                    Skip saving of raw files\n");
+    # fprintf(stderr, "   --png-only             Skip saving of raw files\n");
 
     # wipe function to make sure it only runs once
     _setup.__code__ = (lambda: None).__code__
@@ -38,35 +38,58 @@ def _setup():
 _setup()
 
 
-class Io():
+class Diskmanager():
     """Handle Tasks related to writing to disk, incl file formats and such."""
 
+    __monostate = None  # borg pattern
+
     def __init__(self):
-        self.loop = asyncio.get_event_loop()
-        self.logging = logging.getLogger("myLog")
-        self.options = conf.Conf().options
+        if Diskmanager.__monostate:
+            self.__dict__ = Diskmanager.__monostate
+        else:
+            Diskmanager.__monostate = self.__dict__
 
-
-    async def save_png(self, filename, img):
-        """Save a png file to disk."""
-        img *= 16
-        await self.loop.run_in_executor(ThreadPoolExecutor(), cv2.imwrite,
-                                        filename, img)
+            self.loop = asyncio.get_event_loop()
+            self.logging = logging.getLogger("myLog")
+            self.options = conf.Conf().options
+            self.noofimages = 0
+            self.noofviscam = 0
 
     async def save(self, item):
         """Save an arbitrary item, decide handling from meta data."""
-        filename = f"{self.options['imagePath']}/{str(item.meta['date'])}.png"
+        await getattr(self, "save_"+item.meta["type"])(item)
+
+    async def save_camera(self, item):
+        """Sava a camera image."""
+        filename = f"{self.options.imagePath}/{str(item.meta['date'])}.png"
         self.logging.info("saving image to path %s", filename)
         img = item.data * 16  # fixme: should depend on depth
         # TODO save meta data
-
-        # await asyncio.sleep(4)
 
         write_status = await self.loop.run_in_executor(ThreadPoolExecutor(),
                                                        cv2.imwrite,
                                                        filename, img)
 
         if write_status:
-            self.logging.info("image written")
+            self.logging.info("image written (%s)", self.noofimages)
         else:
-            self.logging.error("couldn't write image")
+            self.logging.error("couldn't write image to %s", filename)
+            # TODO: raise some sort of exception?
+
+        self.noofimages += 1
+
+    async def viscam_save(self, item):
+        """Save a viscam image."""
+        filename = f"{self.options.imagePath}/viscam-{str(item.meta['date'])}.jpg"
+        self.logging.debug("saving viscam image to path %s", filename)
+
+        write_status = await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                                       cv2.imwrite,
+                                                       filename, item.data)
+        if write_status:
+            self.logging.debug("viscam image written (%s)", self.noofimages)
+        else:
+            self.logging.error("couldn't write viscam image to %s", filename)
+            # TODO: raise some sort of exception?
+
+        self.noofviscam += 1

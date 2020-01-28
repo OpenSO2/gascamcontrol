@@ -4,8 +4,9 @@ import logging
 import log
 import tui
 import conf
-import ioo as io
+import diskmanager
 import comm
+import devicemanager
 from processingqueue import Queue
 
 
@@ -13,7 +14,6 @@ class so2cam():
     """Setup basic plumbing."""
 
     def __init__(self):
-        # self.cameras = cameras
         self.conf = conf.Conf()
         self.conf.parse()
 
@@ -21,21 +21,24 @@ class so2cam():
 
         self.logging = logging.getLogger("myLog")
         self.tui = tui.Tui()
-        self.io = io.Io()
+        self.diskmanager = diskmanager.Diskmanager()
         self.comm = comm.Comm()
         # self.display = display.Display()
         self.queue = Queue()
         self.loop = asyncio.get_event_loop()
+        self.devices = devicemanager.Devicemanager()
 
     async def consume_queue(self):
         """Process items from queue."""
+        self.logging.info("consume_queue")
         while True:
+            self.logging.info("queue pop")
             item = await self.queue.pop()
 
             self.logging.debug('processed item %s...', item)
 
             await self.comm.send(item)
-            await self.io.save(item)
+            await self.diskmanager.save(item)
 
     async def monitor_kbd(self):
         while True:
@@ -52,6 +55,8 @@ class so2cam():
 
     def shutdown(self):
         self.logging.info('received stop signal, cancelling tasks...')
+
+        self.devices.stop()
 
         # Find all running tasks:
         pending = asyncio.Task.all_tasks()
@@ -83,13 +88,12 @@ class so2cam():
                 break
 
     def startup(self):
-        # self.processmanager.startall()
         self.tui.startup()
         self.loop.create_task(self.monitor_kbd())
         self.loop.create_task(self.monitor_tui())
-        # self.loop.create_task(self.monitor_cameras())
-        # self.loop.create_task(self.monitor_viscam())
+        self.logging.info("consume queue:")
         self.loop.create_task(self.consume_queue())
+        self.logging.info("consume queue task started")
         self.comm.run()
         # self.display.run()
 
@@ -97,6 +101,8 @@ class so2cam():
         # for sign in signals:
         #     self.loop.add_signal_handler(
         #         sign, lambda s=s: asyncio.create_task(self.shutdown()))
+
+        self.devices.start()
 
         try:
             self.loop.run_forever()
