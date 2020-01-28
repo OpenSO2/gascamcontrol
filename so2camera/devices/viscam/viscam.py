@@ -16,7 +16,8 @@ def _setup():
     """Do setup that needs to happen once on import."""
     parser = configargparse.get_argument_parser()
     parser.add("--viscam_driver", default="mock",
-               help="which viscam driver to use")
+               help="Which viscam driver to use")
+
     # wipe function to make sure it only runs once
     _setup.__code__ = (lambda: None).__code__
 
@@ -47,7 +48,6 @@ class Viscam():
 
     async def start(self):
         """Initiate viscam device."""
-
         state = await self.loop.run_in_executor(ThreadPoolExecutor(),
                                                 self.driver.init, self.viscam)
         if state:
