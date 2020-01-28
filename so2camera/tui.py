@@ -1,8 +1,10 @@
 """Text User Interface (tui) for so2cam."""
 import logging
 import curses
-import conf
 from processingqueue import Queue
+import devicemanager
+import diskmanager
+# import conf
 
 
 class CursesHandler(logging.Handler):
@@ -33,6 +35,8 @@ class Tui():
         self.logging = self.logger
         self._status_win = None
         self.queue = Queue()
+        self.devicemanager = devicemanager.Devicemanager()
+        self.diskmanager = diskmanager.Diskmanager()
 
     def startup(self):
         curses.wrapper(self.setupscreen)
@@ -75,10 +79,10 @@ class Tui():
         self.status_win()
 
     def update(self):
+        self.handle_input()
         self.status_win()
 
     def handle_input(self):
-        # return
         inputchar = self.stdscr.getch()
         if inputchar == ord('1'):
             self.loglevel = logging.DEBUG
@@ -86,9 +90,13 @@ class Tui():
             self.loglevel = logging.INFO
         if inputchar == ord('3'):
             self.loglevel = logging.WARN
+        if inputchar == ord('y'):
+            self.devicemanager.start()
+        if inputchar == ord('n'):
+            self.devicemanager.stop()
         if inputchar == ord('q'):
-            self.stdscr.addstr("Some text here")
-            conf.options["stop"] = True
+            pass
+        #     conf.options["stop"] = True
 
     def log_win(self):
         height = self.maxy // 2 - 4
@@ -129,8 +137,9 @@ class Tui():
         title = "Control"
         win.box()
         win.addstr(0, (width - len(title)) // 2, title)
-        win.addstr(1, 1, "y = start")
-        win.addstr(2, 1, "q = stop")
+        win.addstr(1, 1, "y = start   1 = logging:debug   2 = logging:info")
+        win.addstr(2, 1, "n = stop    3 = logging:error                   ")
+
         win.refresh()
 
     def info_win(self):
@@ -156,8 +165,14 @@ class Tui():
             self._status_win.addstr(0, (offset_y + width - len(title)) // 2, title)
         status = "running"
         self._status_win.addstr(1, 1, f"Aquisition: {status}")
-        self._status_win.addstr(2, 1, f"Loglevel: {logging.getLevelName(self.loglevel)}")
+        self._status_win.addstr(
+            2, 1, f"Loglevel: {logging.getLevelName(self.loglevel)}")
         self._status_win.addstr(3, 1, f"Queue Fill level: {len(self.queue)}")
+        self._status_win.addstr(
+            4, 1, f"Image sets created: {self.devicemanager.noofimages}")
+        self._status_win.addstr(
+            5, 1, f"Images saved: {self.diskmanager.noofimages}")
+        # self._status_win.addstr(
+        #     6, 1, f"Last image set created: {len(self.queue)}")
         self._status_win.refresh()
         self.stdscr.refresh()
-
