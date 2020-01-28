@@ -11,10 +11,13 @@ def _setup():
     """Do setup that needs to happen once on import."""
     parser = configargparse.get_argument_parser()
 
-    # filterwheel_device = \\\\.\\COM22
-    # parser.add("--camerashutter_device", default="/dev/serial/by-id/usb"
-    #            "-FTDI_FT232R_USB_UART_A402X19O-if00-port0",
-    #            help="camera shutter device descriptor")
+    # camerashutter_device = \\\\.\\COM22
+    parser.add("--camerashutter_device", default="/dev/serial/by-id/usb"
+               "-FTDI_FT232R_USB_UART_A402X19O-if00-port0",
+               help="camera shutter device descriptor")
+
+    parser.add("--camerashutter_driver", default="mock",
+               help="Driver for camera shutter device")
 
     # wipe function to make sure it only runs once
     _setup.__code__ = (lambda: None).__code__
@@ -47,28 +50,27 @@ class Camerashutter():
 
     async def start(self):
         """Initiate camera shutter device."""
-        print("start")
-        with stdout_redirector():
-            st = await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                                 self.driver.init, self.camerashutter)
-        print("inited")
+        st = await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                             self.driver.init,
+                                             self.camerashutter)
+
+        # FIXME
         if st:
             print("ERRROROROR!")
-            print(f"fff {st}")
-            raise
         return self
 
     async def setState(self, state):
-        """ """
-        print("set")
-        with stdout_redirector():
-            await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                            self.driver.setState,
-                                            self.camerashutter, state)
-        # return np.reshape(self.viscam.buffer, shape)
+        await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                        self.driver.setState,
+                                        self.camerashutter, state)
+
+    async def open(self):
+        await self.setState("open")
+
+    async def close(self):
+        await self.setState("close")
 
     async def stop(self):
         """Stop viscam and release device."""
-        with stdout_redirector():
-            await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                            self.driver.uninit, self.camerashutter)
+        await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                        self.driver.uninit, self.camerashutter)
