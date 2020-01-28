@@ -33,7 +33,7 @@ class StreamToLogger():
         for line in buf.rstrip().splitlines():
             self.logger.log(self.log_level, line.rstrip())
 
-    def flush(self, buf):
+    def flush(self, buf=""):
         """Alias for write."""
         self.write(buf)
 
