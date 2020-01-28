@@ -12,16 +12,6 @@ def _setup():
     """Do setup that needs to happen once on import."""
     parser = configargparse.get_argument_parser()
 
-    # parser.add("--InterFrameDelay", default=10,
-    #            help="delay between two frames in ms")
-    # parser.add("--FixTime", default=0,
-    #            help="fix exposure time 1 = yes 0 = no")
-
-    # contains the Exposuretime in [us]
-    # min = 2.4 max = 1004400
-    # parser.add("--ExposureTime_a", default=1004400)
-    # parser.add("--ExposureTime_b", default=1004400)
-
     # wipe function to make sure it only runs once
     _setup.__code__ = (lambda: None).__code__
 
@@ -37,6 +27,8 @@ class Camera():
         self.identifier = identifier
         self.loop = asyncio.get_event_loop()
         self.logger = logging.getLogger('myLog')
+        self.logging = self.logger
+        self.logging.info("init camera %s %s", driver, identifier)
 
         driver = f"devices.camera.drivers.{self.drivername}.camera"
         self.driver = importlib.import_module(driver)
@@ -46,6 +38,9 @@ class Camera():
         self.camera.identifier = self.identifier
         self.camera.exposuretime = 250000  # start exposure time
 
+    # def __str__(self):
+    #     return f"Camera {self.drivername} {self.identifier}"
+
     async def __aenter__(self):
         return await self.start()
 
@@ -54,21 +49,22 @@ class Camera():
 
     async def start(self):
         """Initiate camera device."""
-        self.logger.debug("init camera %s", self.identifier)
         await self.loop.run_in_executor(ThreadPoolExecutor(),
                                         self.driver.init, self.camera)
-        self.logger.debug("init camera done.")
-
-        # FIXME: Im not sure this should be here... maybe own method?
-        await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                        self.driver.autosetExposure,
-                                        self.camera)
-        self.logger.debug("camera set autoset exposure done, camera ready")
 
         return self
 
+    async def set_exposure(self):
+        """Trigger a exposure correction in driver."""
+        self.logger.debug("camera set autoset exposure")
+        return await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                               self.driver.autosetExposure,
+                                               self.camera)
+
     async def get(self):
         """Get a single image buffer."""
+        self.logger.info("get buffer %s", self.camera.identifier)
+
         stat = await self.loop.run_in_executor(ThreadPoolExecutor(),
                                                self.driver.get,
                                                self.camera, 1)
