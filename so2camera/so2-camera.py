@@ -16,8 +16,7 @@ class so2cam():
     def __init__(self):
         self.conf = conf.Conf()
         self.conf.parse()
-
-        log.Log('myLog')
+        self.options = self.conf.options
 
         self.logging = logging.getLogger("myLog")
         self.tui = tui.Tui()
@@ -88,9 +87,14 @@ class so2cam():
                 break
 
     def startup(self):
-        self.tui.startup()
-        self.loop.create_task(self.monitor_kbd())
-        self.loop.create_task(self.monitor_tui())
+        if self.options.simpletui:
+            logging.basicConfig(level=logging.DEBUG)
+        else:
+            self.tui.startup()
+            log.Log('myLog')
+            self.loop.create_task(self.monitor_kbd())
+            self.loop.create_task(self.monitor_tui())
+
         self.logging.info("consume queue:")
         self.loop.create_task(self.consume_queue())
         self.logging.info("consume queue task started")

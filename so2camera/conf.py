@@ -87,6 +87,9 @@ class Conf():
                         "then exits",
                         is_write_out_config_file_arg=True)
 
+        self.parser.add("--simpletui", action="store_true",
+                        help="No interface, just log msgs.")
+
         self.options, _ = self.parser.parse_known_args()
 
         # validate
