@@ -2,10 +2,8 @@
 import sys
 import os
 import asyncio
-from argparse import ArgumentParser
-
 import logging
-logging.basicConfig(filename='example.log', level=logging.DEBUG)
+from argparse import ArgumentParser
 
 PACKAGE_PARENT = '../..'
 TOPLEVELPATH = os.path.realpath(os.path.join(os.getcwd(),
@@ -28,7 +26,12 @@ def main():
     parser.add_argument("state", default="open", help="[open|close] shutter")
     parser.add_argument("--driver", default="mock",
                         help="Device driver to use (see ./drivers)")
+    parser.add_argument("--debug", action="store_true",
+                        help="Print debug messaged")
     options = parser.parse_args()
+
+    logging.basicConfig(level=logging.DEBUG if options.debug else logging.INFO)
+
     loop = asyncio.get_event_loop()
     device = ("/dev/serial/by-id/usb-Pololu_Corporation_"
               "Pololu_Micro_Maestro_6-Servo_Controller_00135615-if00")

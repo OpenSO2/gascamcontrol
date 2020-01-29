@@ -8,9 +8,7 @@ import conf
 def _setup():
     """Do setup that needs to happen once on import."""
     parser = configargparse.get_argument_parser()
-
-    parser.add("--debug", default=False, const=True, action="store_const",
-               help="Set default log level to debug")
+    parser.add("--debug", action="store_true", help="Print debug messages")
     parser.add("--logfile", default="so2-camera.log", help="Logfile")
 
     # wipe function to make sure it only runs once

@@ -2,6 +2,7 @@
 import sys
 import os
 import asyncio
+import logging
 from argparse import ArgumentParser
 
 PACKAGE_PARENT = '../..'
@@ -25,7 +26,12 @@ def main():
     parser.add_argument("state", default="open", help="[open|close] shutter")
     parser.add_argument("--driver", default="mock",
                         help="Device driver to use (see ./drivers)")
+    parser.add_argument("--debug", action="store_true",
+                        help="Print debug messaged")
     options = parser.parse_args()
+
+    logging.basicConfig(level=logging.DEBUG if options.debug else logging.INFO)
+
     loop = asyncio.get_event_loop()
     device = "/dev/ttyACM0"
     channel = 5

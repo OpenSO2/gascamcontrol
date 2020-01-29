@@ -2,12 +2,9 @@
 import sys
 import os
 import asyncio
+import logging
 from argparse import ArgumentParser
 import cv2
-# 
-# import logging
-# logging.basicConfig(filename='example.log', level=logging.DEBUG)
-# logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 PACKAGE_PARENT = '../..'
 TOPLEVELPATH = os.path.realpath(os.path.join(os.getcwd(),
@@ -42,7 +39,11 @@ def main():
     parser.add_argument("filename", default="out.png", help="file to save to")
     parser.add_argument("--driver", default="mock",
                         help="Device driver to use (see ./drivers)")
+    parser.add_argument("--debug", action="store_true",
+                        help="Print debug messaged")
     options = parser.parse_args()
+
+    logging.basicConfig(level=logging.DEBUG if options.debug else logging.INFO)
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(capture(options.driver, options.filename,

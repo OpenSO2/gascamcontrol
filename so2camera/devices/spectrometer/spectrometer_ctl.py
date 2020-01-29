@@ -1,6 +1,7 @@
 """Command line spectrometer program for testing and demonstration."""
 import sys
 import os
+import logging
 import asyncio
 import csv
 import configargparse
@@ -35,7 +36,12 @@ def main():
     parser.add_argument("--exposure", default=1E6, type=int,
                         help="Exposure time in ms")
     parser.add_argument("--outfile", help="File to save spectrum to")
+    parser.add_argument("--debug", action="store_true",
+                        help="Print debug messaged")
     options = parser.parse_args()
+
+    logging.basicConfig(level=logging.DEBUG if options.debug else logging.INFO)
+
     loop = asyncio.get_event_loop()
     loop.run_until_complete(get_spectrum(options.spectrometer_driver,
                                          options.exposure, options.outfile))
