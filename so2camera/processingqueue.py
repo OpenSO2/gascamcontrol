@@ -52,6 +52,10 @@ class ViscamQueueItem(QueueItem):
     def __init_(self, image, meta):
         QueueItem.__init__(self, image, meta)
 
+
+class SpecQueueItem(QueueItem):
+    pass
+
 # class CamSet(QueueItem):
 #     def __init_(self, meta, data):
 #         QueueItem.__init__(self)

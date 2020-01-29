@@ -1,14 +1,14 @@
 """Manage processes (not real proccesses, but async tasks)."""
 #   - todo devicemanager: add spectro to queue
-#   - todo spectroscopy
 import asyncio
 import logging
 import configargparse
 import conf
-from processingqueue import CamQueueItem, Queue, ViscamQueueItem
+from processingqueue import CamQueueItem, Queue, ViscamQueueItem, SpecQueueItem
 from devices.viscam.viscam import Viscam
 from devices.camera.cameras import Cameras
 from devices.camerashutter.camerashutter import Camerashutter
+from spectrometry import Spectrometry
 
 
 def _setup():
@@ -103,11 +103,19 @@ class Devicemanager():
 
     async def spectroscopy(self):
         """Run spectroscopy and put spectra into queue."""
-        while True:
-            try:
-                await asyncio.sleep(.2)
-            except asyncio.CancelledError:
-                self.logging.warning("Got CancelledError spectroscopy")
+
+        async with Spectrometry as spectrometry:
+            await spectrometry.calibrate()
+            while True:
+                try:
+                    wavelengths, spectrum = spectrometry.measure()
+                    meta = {
+                        type: "spectrum"
+                    }
+                    await self.queue.push(SpecQueueItem(wavelengths,
+                                                        spectrum, meta))
+                except asyncio.CancelledError:
+                    self.logging.warning("Got CancelledError spectroscopy")
 
     def start(self):
         """Set running flag to true and start tasks.
