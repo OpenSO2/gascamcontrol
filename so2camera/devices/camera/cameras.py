@@ -2,6 +2,7 @@
 import logging
 import asyncio
 import configargparse
+import conf
 from .camera import Camera
 
 
@@ -39,8 +40,7 @@ class Cameras():
         self.logging = self.logger
         self.logger.info("initialize cameras")
 
-        self.logger.info("options: %s", configargparse.options)
-        self.options = configargparse.options
+        self.options = conf.Conf().options
 
         self.logger.info("cameras to init: %s, %s ",
                          self.options.camera_drivers,
@@ -57,11 +57,11 @@ class Cameras():
 
     async def init(self):
         """Initialize all cameras."""
-        self.logger.info("cameras init")
+        self.logger.debug("collect all cameras to start")
         camera_tasks = [cameras.start() for cameras in self.cameras]
-        self.logger.info("cameras init %s", camera_tasks)
+        self.logger.debug("start all cameras %s", camera_tasks)
         self.cameras = await asyncio.gather(*camera_tasks)
-        self.logger.info("init cams done")
+        self.logger.debug("all cameras started")
 
     async def get(self):
         """Get a full set of images by scheduling get from all concurrently."""

@@ -15,13 +15,13 @@ def _setup():
     """Do setup that needs to happen once on import."""
     parser = configargparse.get_argument_parser()
 
-    parser.add("--disableWebcam", default=False,
+    parser.add("--disableWebcam", action="store_true",
                help="Disable processing and saving of webcam images")
-    parser.add("--disableSpectroscopy", default=False,
+    parser.add("--disableSpectroscopy", action="store_true",
                help="Disable processing and saving of spectra")
     parser.add("--max_image_sets", default=-1,
                help="Only take N image sets and exit")
-    parser.add("--darkframeintervall", default=100,
+    parser.add("--darkframeinterval", default=100, type=int,
                help="Take N image sets between dark image sets")
 
     # wipe function to make sure it only runs once
@@ -71,22 +71,21 @@ class Devicemanager():
         """Run cameras and put images into queue."""
         self.logging.debug("start cameras")
         async with Cameras() as cameras:
-            self.logging.debug("cameras initialized")
+            self.logging.debug("cameras started")
 
             while True:
                 try:
                     dark = not self.noofimages % self.options.darkframeinterval
                     if dark:
                         await self.camerashutter.close()
-                        await self.cameras.set_exposure()
-                    else:
+                        await cameras.set_exposure()
                         await self.camerashutter.open()
 
                     self.logging.debug("get imageset")
                     images = await cameras.get()
                     for img, meta in images:
-                        meta.dark = dark
-                        meta.type = "camera"
+                        meta["dark"] = dark
+                        meta["type"] = "camera"
                         await self.queue.push(CamQueueItem(img, meta))
 
                     self.noofimages += 1
@@ -100,6 +99,9 @@ class Devicemanager():
                 except asyncio.CancelledError:
                     self.logging.warning("Got CancelledError cameras")
                     break
+                except:
+                    self.logging.error("exception caught", exc_info=True)
+                    raise
 
     async def spectroscopy(self):
         """Run spectroscopy and put spectra into queue."""

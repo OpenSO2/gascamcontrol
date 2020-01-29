@@ -65,13 +65,9 @@ class Spectrometershutter():
         if st:
             print("ERRROROROR!")
             print(f"fff {st}")
-            # FIXME
-            # raise
         return self
 
     async def setState(self, state):
-        """ """
-        print("set")
         await self.loop.run_in_executor(ThreadPoolExecutor(),
                                         self.driver.setState,
                                         self.spectrometershutter, state)

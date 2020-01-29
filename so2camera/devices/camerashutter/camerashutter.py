@@ -1,5 +1,3 @@
-"""
-"""
 import importlib
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
@@ -37,7 +35,7 @@ class Camerashutter():
         self.loop = asyncio.get_event_loop()
         self.logger = logging.getLogger('myLog')
 
-        driver = f"devices.camerashutter.drivers.{self.drivername}.camerashutter"
+        driver = f"devices.camerashutter.drivers.{driver}.camerashutter"
         self.driver = importlib.import_module(driver)
         self.camerashutter = self.driver.camerashutter()
         self.camerashutter.device = device
