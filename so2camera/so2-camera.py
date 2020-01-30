@@ -8,6 +8,7 @@ import diskmanager
 import comm
 import devicemanager
 from processingqueue import Queue
+import pluginmanager
 
 
 class so2cam():
@@ -26,6 +27,7 @@ class so2cam():
         self.queue = Queue()
         self.loop = asyncio.get_event_loop()
         self.devices = devicemanager.Devicemanager()
+        self.pluginmanager = pluginmanager.Pluginmanager()
 
     async def consume_queue(self):
         """Process items from queue."""
@@ -55,6 +57,7 @@ class so2cam():
     def shutdown(self):
         self.logging.info('received stop signal, cancelling tasks...')
 
+        self.pluginmanager.uninit()
         self.devices.stop()
 
         # Find all running tasks:
@@ -107,6 +110,7 @@ class so2cam():
         #         sign, lambda s=s: asyncio.create_task(self.shutdown()))
 
         self.devices.start()
+        self.pluginmanager.init()
 
         try:
             self.loop.run_forever()
