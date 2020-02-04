@@ -1,0 +1,34 @@
+image: "python:3.7"
+
+before_script:
+  - python --version
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
+
+stages:
+  - Static Analysis
+  - Test
+
+flake8:
+  stage: Static Analysis
+  script:
+  - flake8 --exclude=pybind11
+
+pylint:
+  stage: Static Analysis
+  script:
+  - pylint --ignore=pybind11 so2camera
+
+pydocstyle:
+  stage: Static Analysis
+  script:
+  - pydocstyle
+
+doctest:
+  stage: Test
+  script:
+  - python -m doctest -v so2camera/*.py so2camera/devices/*/*.py
+
+#
+# c++ lint
+#

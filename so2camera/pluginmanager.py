@@ -18,7 +18,7 @@ def _setup():
                          if os.path.isfile(os.path.join(_PLUGIN_PATH, f))
                          and "plugin_" in f])
 
-    parser.add("--plugins", nargs='+',
+    parser.add("--plugins", nargs='+', default=[],
                help=f"Plugins to load from {_PLUGIN_PATH}. "
                     f"Available Plugins: {plugins}")
 

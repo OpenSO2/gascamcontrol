@@ -61,7 +61,7 @@ class Spectrometershutter():
         """Initiate spectrometer shutter device."""
         st = await self.loop.run_in_executor(ThreadPoolExecutor(),
                                              self.driver.init, self.spectrometershutter)
-        print("inited", self.spectrometershutter,  self.spectrometershutter.device)
+        print("inited", self.spectrometershutter, self.spectrometershutter.device)
         if st:
             print("ERRROROROR!")
             print(f"fff {st}")

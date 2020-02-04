@@ -53,8 +53,7 @@ class Conf():
         default_filename = "so2-camera.conf"
 
         default_path = "./configurations"
-        paths = [default_path]
-        paths.append(xdg_home)
+        paths = [default_path, xdg_home]
         paths.extend(xdg_config_dirs)
         return [os.path.join(p, default_filename) for p in paths if p]
 

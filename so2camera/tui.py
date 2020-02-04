@@ -1,4 +1,5 @@
 """Text User Interface (tui) for so2cam."""
+# https://docs.python.org/3.6/library/textwrap.html
 import logging
 import curses
 from processingqueue import Queue
@@ -150,6 +151,16 @@ class Tui():
         title = "Info"
         win.box()
         win.addstr(0, (offset_y + width - len(title)) // 2, title)
+
+        win.addstr(1, 1, "SO2-Camera Control Software")
+
+        win.addstr(3, 1, "A control program for run multi-view cameras and ")
+        win.addstr(4, 1, "pre-process UV camera data.")
+        win.addstr(5, 1, "")
+        win.addstr(6, 1, "Version: 0.1")
+        win.addstr(7, 1, "Licence: MIT")
+        win.addstr(8, 1, "Source: git.io/Jv3hl")
+        win.addstr(9, 1, "Info: johann.jacobson@uni-hamburg.de")
         win.refresh()
 
     def status_win(self):
