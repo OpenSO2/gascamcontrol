@@ -3,12 +3,12 @@ import importlib
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import logging
-import configargparse
+# import configargparse
 
 
 def _setup():
     """Do setup that needs to happen once on import."""
-    parser = configargparse.get_argument_parser()
+    # parser = configargparse.get_argument_parser()
 
     # spectrometer shutter device descriptor
     # eg.
@@ -36,16 +36,18 @@ _setup()
 
 
 class Spectrometershutter():
-    """
+    """Implement shutter device for spectrometer.
+
     Delegates the actual implementation to the drivers in ./drivers.
     """
 
     def __init__(self, driver, device, channel):
         self.drivername = driver
         self.loop = asyncio.get_event_loop()
-        self.logger = logging.getLogger('myLog')
+        self.logging = logging.getLogger('myLog')
 
-        driver = f"devices.spectrometershutter.drivers.{self.drivername}.spectrometershutter"
+        driver = (f"devices.spectrometershutter.drivers."
+                  f"{self.drivername}.spectrometershutter")
         self.driver = importlib.import_module(driver)
         self.spectrometershutter = self.driver.camerashutter()
         self.spectrometershutter.device = device
@@ -60,8 +62,10 @@ class Spectrometershutter():
     async def start(self):
         """Initiate spectrometer shutter device."""
         st = await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                             self.driver.init, self.spectrometershutter)
-        print("inited", self.spectrometershutter, self.spectrometershutter.device)
+                                             self.driver.init,
+                                             self.spectrometershutter)
+        self.logging.debug("inited", self.spectrometershutter,
+                           self.spectrometershutter.device)
         if st:
             print("ERRROROROR!")
             print(f"fff {st}")

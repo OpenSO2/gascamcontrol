@@ -99,13 +99,12 @@ class Devicemanager():
                 except asyncio.CancelledError:
                     self.logging.warning("Got CancelledError cameras")
                     break
-                except:
+                except Exception:
                     self.logging.error("exception caught", exc_info=True)
                     raise
 
     async def spectroscopy(self):
         """Run spectroscopy and put spectra into queue."""
-
         async with Spectrometry as spectrometry:
             await spectrometry.calibrate()
             while True:

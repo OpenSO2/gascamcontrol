@@ -25,6 +25,8 @@ def uninit(_spectro):
 
 
 class spectrometer():
+    """Provide support for spectrometer."""
+
     lastSpectrum = None
     integration_time_micros = None
     wavelengths = None

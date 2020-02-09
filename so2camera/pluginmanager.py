@@ -6,7 +6,7 @@ import configargparse
 import conf
 
 
-_PLUGIN_PATH = "plugins/"
+_PLUGIN_PATH = os.path.join(os.path.dirname(__file__), "plugins")
 
 
 def _setup():
@@ -41,9 +41,11 @@ class Pluginmanager():
                         for name in self.options.plugins]
 
     async def init(self):
+        """Init all registered plugins."""
         for plugin in self.plugins:
             await plugin.init()
 
     async def uninit(self):
+        """Tear down all registered plugins."""
         for plugin in self.plugins:
             await plugin.uninit()

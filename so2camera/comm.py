@@ -18,6 +18,8 @@ _setup()
 
 
 class Comm():
+    """Provide a bi-directional network interface."""
+
     def __init__(self):
         self.app = None
         self.logger = logging.getLogger('myLog')

@@ -2,6 +2,19 @@
 import asyncio
 import logging
 
+# meta
+#   type eg 310, 330
+#   date
+#   gps
+#   temperature
+#   orientation
+#   exposure
+#   enhance
+#   depth
+#   width
+#   height
+# data
+
 
 class Queue():
     """Manage tasks to run (eg. writing to disk etc)."""
@@ -35,7 +48,7 @@ class Queue():
         self.queue.join()
 
 
-class QueueItem():
+class QueueItem():  # pylint: disable=R0903
     """Wrap data that has been queued for processing."""
 
     def __init__(self, data, meta):
@@ -43,33 +56,20 @@ class QueueItem():
         self.meta = meta
 
 
-class CamQueueItem(QueueItem):
-    def __init_(self, image, meta):
-        QueueItem.__init__(self, image, meta)
+class CamQueueItem(QueueItem):  # pylint: disable=R0903
+    """Container for camera image."""
 
 
-class ViscamQueueItem(QueueItem):
-    def __init_(self, image, meta):
-        QueueItem.__init__(self, image, meta)
+class ViscamQueueItem(QueueItem):  # pylint: disable=R0903
+    """Container for viscam image."""
 
 
-class SpecQueueItem(QueueItem):
-    pass
+class SpecQueueItem(QueueItem):  # pylint: disable=R0903
+    """Container for Spectrogram."""
 
-# class CamSet(QueueItem):
-#     def __init_(self, meta, data):
-#         QueueItem.__init__(self)
-#         self.meta = meta
-#         self.data = data
-    # meta
-    #   type eg 310, 330
-    #   date
-    #   gps
-    #   temperature
-    #   orientation
-    #   exposure
-    #   enhance
-    #   depth
-    #   width
-    #   height
-    # data
+    def __init_(self, wavelengths, spectrum, meta):
+        QueueItem.__init__(self, zip(wavelengths, spectrum), meta)
+
+    # def __init__(self, data, meta):
+    #     self.data = data
+    #     self.meta = meta

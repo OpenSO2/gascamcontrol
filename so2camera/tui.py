@@ -173,7 +173,8 @@ class Tui():
             self._status_win = curses.newwin(height, width, offset_y, offset_x)
             title = "Status"
             self._status_win.box()
-            self._status_win.addstr(0, (offset_y + width - len(title)) // 2, title)
+            position = (offset_y + width - len(title)) // 2
+            self._status_win.addstr(0, position, title)
         status = "running"
         self._status_win.addstr(1, 1, f"Aquisition: {status}")
         self._status_win.addstr(

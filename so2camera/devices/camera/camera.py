@@ -5,12 +5,12 @@ from concurrent.futures import ThreadPoolExecutor
 import datetime
 import logging
 import numpy as np
-import configargparse
+# import configargparse
 
 
 def _setup():
     """Do setup that needs to happen once on import."""
-    parser = configargparse.get_argument_parser()
+    # parser = configargparse.get_argument_parser()
 
     # wipe function to make sure it only runs once
     _setup.__code__ = (lambda: None).__code__

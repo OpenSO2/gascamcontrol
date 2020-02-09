@@ -1,5 +1,5 @@
 import asyncio
-import signal
+# import signal
 import logging
 import log
 import tui

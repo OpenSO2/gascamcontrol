@@ -80,7 +80,8 @@ class Diskmanager():
 
     async def viscam_save(self, item):
         """Save a viscam image."""
-        filename = f"{self.options.imagePath}/viscam-{str(item.meta['date'])}.jpg"
+        date = str(item.meta['date'])
+        filename = f"{self.options.imagePath}/viscam-{date}.jpg"
         self.logging.debug("saving viscam image to path %s", filename)
 
         write_status = await self.loop.run_in_executor(ThreadPoolExecutor(),

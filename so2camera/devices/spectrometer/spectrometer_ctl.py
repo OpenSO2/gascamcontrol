@@ -12,7 +12,7 @@ TOPLEVELPATH = os.path.realpath(os.path.join(os.getcwd(),
 SCRIPT_DIR = os.path.dirname(TOPLEVELPATH)
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
-from devices.spectrometer.spectrometer import Spectrometer
+from devices.spectrometer.spectrometer import Spectrometer  # noqa: E402,E501 pylint: disable=C0413,E0401
 
 
 async def get_spectrum(driver, exposure, outfile):
