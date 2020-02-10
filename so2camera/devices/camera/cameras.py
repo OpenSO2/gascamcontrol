@@ -3,7 +3,7 @@ import logging
 import asyncio
 import configargparse
 import conf
-from .camera import Camera
+from devices.camera.camera import Camera
 
 
 def _setup():

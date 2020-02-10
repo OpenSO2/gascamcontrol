@@ -12,19 +12,26 @@ from basePlugin import BasePlugin
 class Plugin(BasePlugin):
     """Plugin to read gpsd device.
 
-    >>> async with Plugin() as plugin:
-            md = await plugin.get_metadata()
-    >>> bool(md.latitude)
+    >>> async def _test():
+    ...    async with Plugin() as plugin:
+    ...        return await plugin.get_metadata()
+    >>> import asyncio
+    >>> md = asyncio.get_event_loop().run_until_complete(_test())
+    >>> "latitude" in md
     True
-    >>> assert(md.longitude)
+    >>> "longitude" in md
     True
-    >>> assert(md.altitude)
+    >>> "altitude" in md
     True
     """
 
     def __init__(self):
         super().__init__()
-        self.position = None
+        self.position = {
+            "latitude": None,
+            "longitude": None,
+            "altitude": None
+        }
         self.gps_watch = None
         self.logging = logging.getLogger("myLog")
         self.loop = asyncio.get_event_loop()
@@ -34,7 +41,7 @@ class Plugin(BasePlugin):
         return self
 
     async def _start_gps_watch(self):
-        """Run continuesly to get a position fix and save to self.postion."""
+        """Run continuously to get a position fix and save to self.position."""
         try:
             async with aiogps.aiogps() as gpsd:
                 async for _ in gpsd:
@@ -52,11 +59,8 @@ class Plugin(BasePlugin):
         """Get geolocation via gpsd.
 
         Because GPSes can take a significant time to get a position fix, this
-        will return the last know position and sleeps until it gets one.
+        will return the last know position even if its none.
         """
-        while not self.position:
-            await asyncio.sleep(.2)
-
         return self.position
 
     async def uninit(self):
@@ -66,7 +70,13 @@ class Plugin(BasePlugin):
 async def _test():
     logging.basicConfig(level=logging.DEBUG)
     async with Plugin() as plugin:
-        print(await plugin.get_metadata())
+        position = await plugin.get_metadata()
+
+        while not position.longitude:
+            await asyncio.sleep(.2)
+            position = plugin.get_metadata()
+
+        print(position)
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(_test())
