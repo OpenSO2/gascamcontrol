@@ -81,7 +81,7 @@ class Gascamcontrol():
         self.logging.info("loop closed")
 
     async def monitor_tui(self):
-        """"Update text user interface."""
+        """Update text user interface."""
         while True:
             try:
                 await asyncio.sleep(1)

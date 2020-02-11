@@ -40,11 +40,11 @@ class Tui():
         self.diskmanager = diskmanager.Diskmanager()
 
     def startup(self):
-        """"Initiate curses."""
+        """Initiate curses."""
         curses.wrapper(self.setupscreen)
 
     def setupscreen(self, stdscr):
-        """"Initiate and layout screen, start windows."""
+        """Initiate and layout screen, start windows."""
         self.stdscr = stdscr
         curses.noecho()
         curses.cbreak()
@@ -84,12 +84,12 @@ class Tui():
         self.status_win()
 
     def update(self):
-        """"Update screen."""
+        """Update screen."""
         self.handle_input()
         self.status_win()
 
     def handle_input(self):
-        """"Parse and act on command input."""
+        """Parse and act on command input."""
         inputchar = self.stdscr.getch()
         if inputchar == ord('1'):
             self.loglevel = logging.DEBUG
@@ -106,7 +106,7 @@ class Tui():
         #     conf.options["stop"] = True
 
     def log_win(self):
-        """"Window showing current log output."""
+        """Window showing current log output."""
         height = self.maxy // 2 - 4
         offset_x = self.padding
         offset_y = self.maxy - height - 4
@@ -138,7 +138,7 @@ class Tui():
         logger.addHandler(handler)
 
     def ctrl_win(self):
-        """"Control window listing available commands."""
+        """Control window listing available commands."""
         height = 4
         width = self.maxx - self.padding
         offset_y = self.maxy - height
@@ -153,7 +153,7 @@ class Tui():
         win.refresh()
 
     def info_win(self):
-        """"Window showing general information."""
+        """Window showing general information."""
         height = self.maxy // 2 - self.padding
         width = self.maxx // 2 - self.padding
         offset_x = offset_y = self.padding
@@ -174,7 +174,7 @@ class Tui():
         win.refresh()
 
     def status_win(self):
-        """"Status window showing system status information."""
+        """Status window showing system status information."""
         if not self._status_win:
             height = self.maxy // 2 - self.padding
             width = (self.maxx) // 2 - self.padding

@@ -1,9 +1,9 @@
-import seabreeze
+from seabreeze import spectrometers
 
 
 def init(spectro):
     """Find and init spectrometer."""
-    spectro.spectrometer = seabreeze.spectrometers.Spectrometer.from_first_available()
+    spectro.spectrometer = spectrometers.Spectrometer.from_first_available()
 
     spectro.wavelengths = spectro.spectrometer.wavelengths()
     spectro.spectrum_length = len(spectro.wavelengths)
@@ -12,7 +12,8 @@ def init(spectro):
 
 def get(spectro):
     """Get a spectrum."""
-    spectro.spectrometer.integration_time_micros(spectro.integration_time_micros)
+    spectro.spectrometer.integration_time_micros(
+        spectro.integration_time_micros)
     spectro.lastSpectrum = spectro.spectrometer.intensities()
 
 

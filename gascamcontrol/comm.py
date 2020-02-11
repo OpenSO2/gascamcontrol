@@ -27,7 +27,7 @@ class Comm():
         self.websockets = []
 
     async def websocket_handler(self, request):
-        """"Handle websocket communication."""
+        """Handle websocket communication."""
         websocket = web.WebSocketResponse()
         await websocket.prepare(request)
         self.websockets.append(websocket)
@@ -49,7 +49,7 @@ class Comm():
         return websocket
 
     async def send(self, item):
-        """"Send data to all clients."""
+        """Send data to all clients."""
         for websocket in self.websockets:
             # if "send" in websocket:
             # await websocket.send_str(f"img shape {img.shape}")
@@ -62,11 +62,11 @@ class Comm():
 
     @staticmethod
     def serve_display(app):
-        """"Server static webapp."""
+        """Server static webapp."""
         app.router.add_static('/app', 'webapp', show_index=True)
 
     def run(self):
-        """"Start running server and websocket."""
+        """Start running server and websocket."""
         app = web.Application()
 
         app.add_routes([web.get('/ws', self.websocket_handler)])
