@@ -67,8 +67,8 @@ class ViscamQueueItem(QueueItem):  # pylint: disable=R0903
 class SpecQueueItem(QueueItem):  # pylint: disable=R0903
     """Container for Spectrogram."""
 
-    def __init_(self, wavelengths, spectrum, meta):
-        QueueItem.__init__(self, zip(wavelengths, spectrum), meta)
+    def __init__(self, wavelengths, spectrum, meta):
+        super().__init__(zip(wavelengths, spectrum), meta)
 
     # def __init__(self, data, meta):
     #     self.data = data

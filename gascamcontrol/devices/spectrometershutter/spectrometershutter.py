@@ -61,19 +61,20 @@ class Spectrometershutter():
 
     async def start(self):
         """Initiate spectrometer shutter device."""
-        st = await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                             self.driver.init,
-                                             self.spectrometershutter)
-        self.logging.debug("inited", self.spectrometershutter,
+        status = await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                                 self.driver.init,
+                                                 self.spectrometershutter)
+        self.logging.debug("inited %s %s", self.spectrometershutter,
                            self.spectrometershutter.device)
-        if st:
+        if status:
             print("ERRROROROR!")
-            print(f"fff {st}")
+            print(f"fff {status}")
         return self
 
-    async def setState(self, state):
+    async def set_state(self, state):
+        """Set state of shutter, either 'open' or 'closed'."""
         await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                        self.driver.setState,
+                                        self.driver.set_state,
                                         self.spectrometershutter, state)
 
     async def stop(self):

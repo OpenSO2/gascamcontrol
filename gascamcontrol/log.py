@@ -9,7 +9,7 @@ def _setup():
     """Do setup that needs to happen once on import."""
     parser = configargparse.get_argument_parser()
     parser.add("--debug", action="store_true", help="Print debug messages")
-    parser.add("--logfile", default="so2-camera.log", help="Logfile")
+    parser.add("--logfile", default="gascamcontrol.log", help="Logfile")
 
     # wipe function to make sure it only runs once
     _setup.__code__ = (lambda: None).__code__

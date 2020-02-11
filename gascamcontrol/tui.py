@@ -40,9 +40,11 @@ class Tui():
         self.diskmanager = diskmanager.Diskmanager()
 
     def startup(self):
+        """"Initiate curses."""
         curses.wrapper(self.setupscreen)
 
     def setupscreen(self, stdscr):
+        """"Initiate and layout screen, start windows."""
         self.stdscr = stdscr
         curses.noecho()
         curses.cbreak()
@@ -71,19 +73,23 @@ class Tui():
 
     @property
     def loglevel(self):
+        """Get current log level."""
         return self._loglevel
 
     @loglevel.setter
     def loglevel(self, value):
+        """Set log level in log and on screen."""
         self._loglevel = value
         self.logger.setLevel(value)
         self.status_win()
 
     def update(self):
+        """"Update screen."""
         self.handle_input()
         self.status_win()
 
     def handle_input(self):
+        """"Parse and act on command input."""
         inputchar = self.stdscr.getch()
         if inputchar == ord('1'):
             self.loglevel = logging.DEBUG
@@ -100,6 +106,7 @@ class Tui():
         #     conf.options["stop"] = True
 
     def log_win(self):
+        """"Window showing current log output."""
         height = self.maxy // 2 - 4
         offset_x = self.padding
         offset_y = self.maxy - height - 4
@@ -121,6 +128,7 @@ class Tui():
         return win
 
     def connect_logger_to_window(self, win, loggername='myLog'):
+        """Route logger output to logger window."""
         handler = CursesHandler(win)
         formatter_display = logging.Formatter(
             '%(asctime)-8s | %(levelname)-7s | %(message)-s', '%H:%M:%S')
@@ -130,6 +138,7 @@ class Tui():
         logger.addHandler(handler)
 
     def ctrl_win(self):
+        """"Control window listing available commands."""
         height = 4
         width = self.maxx - self.padding
         offset_y = self.maxy - height
@@ -144,6 +153,7 @@ class Tui():
         win.refresh()
 
     def info_win(self):
+        """"Window showing general information."""
         height = self.maxy // 2 - self.padding
         width = self.maxx // 2 - self.padding
         offset_x = offset_y = self.padding
@@ -152,7 +162,7 @@ class Tui():
         win.box()
         win.addstr(0, (offset_y + width - len(title)) // 2, title)
 
-        win.addstr(1, 1, "SO2-Camera Control Software")
+        win.addstr(1, 1, "Gas Cam Control Software")
 
         win.addstr(3, 1, "A control program for run multi-view cameras and ")
         win.addstr(4, 1, "pre-process UV camera data.")
@@ -164,6 +174,7 @@ class Tui():
         win.refresh()
 
     def status_win(self):
+        """"Status window showing system status information."""
         if not self._status_win:
             height = self.maxy // 2 - self.padding
             width = (self.maxx) // 2 - self.padding

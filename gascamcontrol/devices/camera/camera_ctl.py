@@ -19,7 +19,7 @@ async def capture(driver, filename, identifier):
     """Capture image from viscam and save to png or raw."""
     async with Camera(driver=driver, identifier=identifier) as camera:
         print("cli inited, get image")
-        img, meta = await camera.get()
+        img, _meta = await camera.get()
         print("cli got image")
         if ".png" in filename:
             # upsample image to use full 16bit range (the image will be very

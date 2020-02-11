@@ -211,7 +211,7 @@ int setup_camera(sParameterStruct * sSO2Parameters)
 	}
 	/* contrast enhancement gain: low */
 	/* CEG L CONTRAST ENHANCEMENT GAIN  (CEG L: 0dB) (CEG H: 14dB) */
-	std::cout << "set contrast enhancement gain to LOW\n");
+	std::cout << "set contrast enhancement gain to LOW\n";
 	eStat = sendMessage(hCamera, (ui8 *) "CEG L\r");
 	if (PHX_OK != eStat) {
 		std::cerr << "sending CEG L to camera was unsuccessful\n";

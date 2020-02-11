@@ -28,12 +28,14 @@ int viscam_init(sVisCamStruct * viscam)
 	buffer = (char *)malloc(sizeof(char) * fsize);
 	if (buffer == NULL) {
 		std::cerr << "error allocating enough memory \n";
+        fclose(fid);
 		return -1;
 	}
 
 	stat = fread(buffer, 1, fsize, fid);
 	if (stat != fsize) {
 		std::cerr << "couldn't read mock viscam image\n";
+        fclose(fid);
 		return -1;
 	}
 	fclose(fid);

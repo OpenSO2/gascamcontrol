@@ -1,4 +1,4 @@
-"""Command line spectrometer shutter program for testing and demonstration."""
+"""Command line camera shutter program for testing and demonstration."""
 import sys
 import os
 import asyncio
@@ -11,19 +11,18 @@ TOPLEVELPATH = os.path.realpath(os.path.join(os.getcwd(),
 SCRIPT_DIR = os.path.dirname(TOPLEVELPATH)
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
+from devices.camerashutter.camerashutter import Camerashutter  # noqa: E402,E501 pylint: disable=C0413,E0401
 
-from devices.spectrometershutter.spectrometershutter import Spectrometershutter  # noqa: E402,E501 pylint: disable=C0413,E0401
 
-
-async def set_shutter(driver, state, device, channel):
-    """Set shutter to state."""
-    async with Spectrometershutter(driver, device, channel) as specshut:
-        await specshut.setState(state)
+async def set_shutter(driver, state, device):
+    """Set shutter state."""
+    async with Camerashutter(driver=driver, device=device) as camshut:
+        await camshut.set_state(state)
 
 
 def main():
     """Run main event loop."""
-    parser = ArgumentParser(description='Spectrometer shutter example program')
+    parser = ArgumentParser(description='Camera shutter example program')
     parser.add_argument("state", default="open", help="[open|close] shutter")
     parser.add_argument("--driver", default="mock",
                         help="Device driver to use (see ./drivers)")
@@ -34,10 +33,9 @@ def main():
     logging.basicConfig(level=logging.DEBUG if options.debug else logging.INFO)
 
     loop = asyncio.get_event_loop()
-    device = "/dev/ttyACM0"
-    channel = 5
-    loop.run_until_complete(set_shutter(options.driver, options.state, device,
-                                        channel))
+    device = ("/dev/serial/by-id/usb-Pololu_Corporation_"
+              "Pololu_Micro_Maestro_6-Servo_Controller_00135615-if00")
+    loop.run_until_complete(set_shutter(options.driver, options.state, device))
 
 
 if __name__ == "__main__":

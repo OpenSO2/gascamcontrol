@@ -8,7 +8,7 @@ PYBIND11_MODULE(spectrometershutter, m) {
     m.doc() = "Manage spectrometer shutter and abstract C nastyness.";
 
     m.def("init", &spectrometershutter_init, "Initialize spectrometer shutter.");
-		m.def("setState", &spectrometershutter_setState, " ");
+		m.def("set_state", &spectrometershutter_setState, " ");
 		m.def("uninit", &spectrometershutter_uninit, "Stop device and free ressources.");
 
     pybind11::class_<sSpectrometershutter>(m, "spectrometershutter")

@@ -5,8 +5,8 @@ that into the image set meta data.
 """
 import logging
 import asyncio
-from gps import aiogps
-from basePlugin import BasePlugin
+from plugins.gps import aiogps
+from plugins.basePlugin import BasePlugin
 
 
 class Plugin(BasePlugin):
@@ -37,6 +37,7 @@ class Plugin(BasePlugin):
         self.loop = asyncio.get_event_loop()
 
     async def init(self):
+        """Start background task to watch for gpsd updates."""
         self.gps_watch = self.loop.create_task(self._start_gps_watch())
         return self
 
@@ -64,6 +65,7 @@ class Plugin(BasePlugin):
         return self.position
 
     async def uninit(self):
+        """Stop background task watching gpsd."""
         self.gps_watch.cancel()
 
 

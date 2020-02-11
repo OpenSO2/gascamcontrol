@@ -1,24 +1,24 @@
-[submodule "so2camera/devices/viscam/drivers/mock/pybind11"]
-	path = so2camera/devices/viscam/drivers/mock/pybind11
+[submodule "gascamcontrol/devices/viscam/drivers/mock/pybind11"]
+	path = gascamcontrol/devices/viscam/drivers/mock/pybind11
 	url = https://github.com/pybind/pybind11
-[submodule "so2camera/devices/viscam/drivers/elpcam/pybind11"]
-	path = so2camera/devices/viscam/drivers/elpcam/pybind11
+[submodule "gascamcontrol/devices/viscam/drivers/elpcam/pybind11"]
+	path = gascamcontrol/devices/viscam/drivers/elpcam/pybind11
 	url = https://github.com/pybind/pybind11
-[submodule "so2camera/devices/camera/drivers/mock/pybind11"]
-	path = so2camera/devices/camera/drivers/mock/pybind11
+[submodule "gascamcontrol/devices/camera/drivers/mock/pybind11"]
+	path = gascamcontrol/devices/camera/drivers/mock/pybind11
 	url = https://github.com/pybind/pybind11
-[submodule "so2camera/devices/camera/drivers/phx/pybind11"]
-	path = so2camera/devices/camera/drivers/phx/pybind11
+[submodule "gascamcontrol/devices/camera/drivers/phx/pybind11"]
+	path = gascamcontrol/devices/camera/drivers/phx/pybind11
 	url = https://github.com/pybind/pybind11
-[submodule "so2camera/devices/camerashutter/drivers/mock/pybind11"]
-	path = so2camera/devices/camerashutter/drivers/mock/pybind11
+[submodule "gascamcontrol/devices/camerashutter/drivers/mock/pybind11"]
+	path = gascamcontrol/devices/camerashutter/drivers/mock/pybind11
 	url = https://github.com/pybind/pybind11
-[submodule "so2camera/devices/camerashutter/drivers/serial/pybind11"]
-	path = so2camera/devices/camerashutter/drivers/serial/pybind11
+[submodule "gascamcontrol/devices/camerashutter/drivers/serial/pybind11"]
+	path = gascamcontrol/devices/camerashutter/drivers/serial/pybind11
 	url = https://github.com/pybind/pybind11
-[submodule "so2camera/devices/spectrometershutter/drivers/pololu-maestro/pybind11"]
-	path = so2camera/devices/spectrometershutter/drivers/pololu-maestro/pybind11
+[submodule "gascamcontrol/devices/spectrometershutter/drivers/pololu-maestro/pybind11"]
+	path = gascamcontrol/devices/spectrometershutter/drivers/pololu-maestro/pybind11
 	url = https://github.com/pybind/pybind11
-[submodule "so2camera/devices/spectrometer/drivers/mock/pybind11"]
-	path = so2camera/devices/spectrometer/drivers/mock/pybind11
+[submodule "gascamcontrol/devices/spectrometer/drivers/mock/pybind11"]
+	path = gascamcontrol/devices/spectrometer/drivers/mock/pybind11
 	url = https://github.com/pybind/pybind11

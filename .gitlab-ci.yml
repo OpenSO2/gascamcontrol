@@ -1,28 +1,14 @@
 image: continuumio/miniconda3:latest
 
 before_script:
-  - apt-get update --yes
 #   - apt-get install -y conda cmake valgrind
   - apt-get update -q -y
   - apt-get install -y build-essential
   - apt-get install -y libgl1-mesa-glx # conda opencv
-
-  #  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-#  - bash miniconda.sh -b -p $HOME/miniconda
-#  - export PATH="$HOME/miniconda/bin:$PATH"
-#  - hash -r
-#  - conda config --set always_yes yes --set changeps1 no
-#  - conda update -q conda
-#  - conda config --add channels conda-forge
   - conda info -a
   - conda env create -n test-environment -f env.yml
   - source activate test-environment
   - python --version
-#  - pip install -r requirements.txt
-#  - pip install -r requirements-dev.txt
-#  - conda env create -n test-environment -f env.yml
-#  - source activate test-environment
-#  - python setup.py install
   - conda install flake8 pydocstyle pylint
 
 stages:
@@ -37,7 +23,7 @@ flake8:
 pylint:
   stage: Static Analysis
   script:
-  - pylint --ignore=pybind11 so2camera --exit-zero
+  - pylint --ignore=pybind11 gascamcontrol
 
 pydocstyle:
   stage: Static Analysis
@@ -47,12 +33,10 @@ pydocstyle:
 doctest:
   stage: Test
   script:
-  - python -m doctest -v so2camera/*.py so2camera/devices/*/*.py so2camera/plugins/*.py
+  - python -m doctest -v gascamcontrol/*.py gascamcontrol/devices/*/*.py gascamcontrol/plugins/*.py
 
 #
-# pytest
 #
-# c++ lint
 #  clang-tidy
 #  cppcheck
 #  cpplint

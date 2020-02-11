@@ -27,11 +27,11 @@ class Conf():
         The first config file that is found is used, it is searched for (in
         this order), at:
          - config, if set (e.g. from the cli)
-         - from the default source path (./configurations/so2-camera.conf)
+         - from the default source path (./configurations/gascamcontrol.conf)
          - home path
-           - XDG_CONFIG_HOME/so2-camera/so2-camera.conf (linux only)
+           - XDG_CONFIG_HOME/gascamcontrol/gascamcontrol.conf (linux only)
          - system path
-           - XDG_CONFIG_DIRS/so2-camera/so2-camera.conf (linux only)
+           - XDG_CONFIG_DIRS/gascamcontrol/gascamcontrol.conf (linux only)
 
         >>> c = Conf()
         >>> type(c.get_config_file_paths())
@@ -50,7 +50,7 @@ class Conf():
         elif 'HOME' in env:
             xdg_config_dirs = ['/etc/xdg']
 
-        default_filename = "so2-camera.conf"
+        default_filename = "gascamcontrol.conf"
 
         default_path = "./configurations"
         paths = [default_path, xdg_home]
@@ -67,7 +67,7 @@ class Conf():
 
         # pylint: disable=W0212
         self.parser._default_config_files = self.get_config_file_paths()
-        self.parser.description = """SO2-Camera Control Software.
+        self.parser.description = """Gas Cam Control Software.
 
         This software comes with ABSOLUTELY NO WARRANTY.
         This is free software and you

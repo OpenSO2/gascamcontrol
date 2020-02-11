@@ -48,25 +48,28 @@ class Camerashutter():
 
     async def start(self):
         """Initiate camera shutter device."""
-        st = await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                             self.driver.init,
-                                             self.camerashutter)
+        status = await self.loop.run_in_executor(ThreadPoolExecutor(),
+                                                 self.driver.init,
+                                                 self.camerashutter)
 
         # FIXME
-        if st:
+        if status:
             print("ERRROROROR!")
         return self
 
-    async def setState(self, state):
+    async def set_state(self, state):
+        """Set state of shutter, either 'open' or 'closed'."""
         await self.loop.run_in_executor(ThreadPoolExecutor(),
-                                        self.driver.setState,
+                                        self.driver.set_state,
                                         self.camerashutter, state)
 
     async def open(self):
-        await self.setState("open")
+        """Open shutter."""
+        await self.set_state("open")
 
     async def close(self):
-        await self.setState("close")
+        """Close shutter."""
+        await self.set_state("close")
 
     async def stop(self):
         """Stop viscam and release device."""

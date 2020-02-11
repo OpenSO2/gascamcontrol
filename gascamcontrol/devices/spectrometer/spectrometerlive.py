@@ -38,7 +38,7 @@ async def plot(driver):
     # stop program when window is closed
     fig.canvas.mpl_connect('close_event', lambda _: shutdown())
 
-    ax = fig.add_subplot(111)
+    axes = fig.add_subplot(111)
     plt.show()
     plt.pause(0.1)
 
@@ -48,7 +48,7 @@ async def plot(driver):
         while 1:  # plot indefinitely
             wvl, data = await spectrometer.get(EXPOSURE)
             if not axplt:
-                axplt = ax.plot(wvl, data, 'r-')[0]
+                axplt = axes.plot(wvl, data, 'r-')[0]
             axplt.set_ydata(data)
             plt.draw()
             plt.pause(0.1)

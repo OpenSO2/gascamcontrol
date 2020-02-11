@@ -11,7 +11,7 @@ from processingqueue import Queue
 import pluginmanager
 
 
-class so2cam():
+class Gascamcontrol():
     """Setup basic plumbing."""
 
     def __init__(self):
@@ -41,20 +41,21 @@ class so2cam():
             await self.comm.send(item)
             await self.diskmanager.save(item)
 
-    async def monitor_kbd(self):
-        while True:
-            try:
-                await asyncio.sleep(.1)
-                # if conf.options["stop"]:
-                #     print("== stop")
-                #     asyncio.create_task(self.shutdown(loop))
-                #     print("== die!")
-                #     break
-            except asyncio.CancelledError:
-                print("Got CancelledError monitor_kbd")
-                break
+#    async def monitor_kbd(self):
+#        while True:
+#            try:
+#                await asyncio.sleep(.1)
+#                # if conf.options["stop"]:
+#                #     print("== stop")
+#                #     asyncio.create_task(self.shutdown(loop))
+#                #     print("== die!")
+#                #     break
+#            except asyncio.CancelledError:
+#                print("Got CancelledError monitor_kbd")
+#                break
 
     def shutdown(self):
+        """Stop application, kill background tasks, stop devices, cleanup."""
         self.logging.info('received stop signal, cancelling tasks...')
 
         self.pluginmanager.uninit()
@@ -80,6 +81,7 @@ class so2cam():
         self.logging.info("loop closed")
 
     async def monitor_tui(self):
+        """"Update text user interface."""
         while True:
             try:
                 await asyncio.sleep(1)
@@ -90,12 +92,13 @@ class so2cam():
                 break
 
     def startup(self):
+        """Start application."""
         if self.options.simpletui:
             logging.basicConfig(level=logging.DEBUG)
         else:
             self.tui.startup()
             log.Log('myLog')
-            self.loop.create_task(self.monitor_kbd())
+#            self.loop.create_task(self.monitor_kbd())
             self.loop.create_task(self.monitor_tui())
 
         self.logging.info("consume queue:")
@@ -121,7 +124,7 @@ class so2cam():
 
 def main():
     """Kick of program."""
-    cam = so2cam()
+    cam = Gascamcontrol()
     cam.startup()
 
 
