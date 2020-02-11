@@ -18,22 +18,23 @@ stages:
 flake8:
   stage: Static Analysis
   script:
-  - flake8 --exclude=pybind11,gps
+    - flake8 --exclude=pybind11,gps
 
 pylint:
   stage: Static Analysis
   script:
-  - pylint --ignore=pybind11 gascamcontrol
+    - cd gascamcontrol
+    - pylint --ignore=pybind11 gascamcontrol
 
 pydocstyle:
   stage: Static Analysis
   script:
-  - pydocstyle
+    - pydocstyle
 
 doctest:
   stage: Test
   script:
-  - python -m doctest -v gascamcontrol/*.py gascamcontrol/devices/*/*.py gascamcontrol/plugins/*.py
+    - python -m doctest -v gascamcontrol/*.py gascamcontrol/devices/*/*.py gascamcontrol/plugins/*.py
 
 #
 #
