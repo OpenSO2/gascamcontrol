@@ -1,9 +1,9 @@
 image: continuumio/miniconda3:latest
 
 before_script:
-#   - apt-get install -y conda cmake valgrind
+#   - apt-get install -y cmake valgrind
   - apt-get update -q -y
-  - apt-get install -y build-essential
+  - apt-get install -y build-essential cppcheck
   - apt-get install -y libgl1-mesa-glx # conda opencv
   - conda info -a
   - conda env create -n test-environment -f env.yml
@@ -30,6 +30,11 @@ pydocstyle:
   stage: Static Analysis
   script:
     - pydocstyle
+
+cppcheck:
+  stage: Static Analysis
+  script:
+    - cppcheck `find -name "*.cpp" -not -path "*/pybind11/*"`
 
 doctest:
   stage: Test
