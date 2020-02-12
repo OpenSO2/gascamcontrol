@@ -3,4 +3,4 @@
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
-disable=R0201,missing-module-docstring,I1101,c-extension-no-member,fixme,todo,too-many-instance-attributes,duplicate-code
+disable=no-self-use,missing-module-docstring,c-extension-no-member,fixme,todo,too-many-instance-attributes,duplicate-code
