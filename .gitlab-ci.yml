@@ -10,6 +10,7 @@ before_script:
   - source activate test-environment
   - python --version
   - conda install flake8 pydocstyle pylint
+  - pip install cpplint
 
 stages:
   - Static Analysis
@@ -18,33 +19,29 @@ stages:
 flake8:
   stage: Static Analysis
   script:
-    - flake8 --exclude=pybind11,gps
+    - make flake8
 
 pylint:
   stage: Static Analysis
   script:
-    - cd gascamcontrol
-    - pylint --ignore=pybind11 gascamcontrol
+    - make pylint
 
 pydocstyle:
   stage: Static Analysis
   script:
-    - pydocstyle
+    - make pydocstyle
 
 cppcheck:
   stage: Static Analysis
   script:
-    - cppcheck `find -name "*.cpp" -not -path "*/pybind11/*"`
+    - make cppcheck
+
+cpplint:
+  stage: Static Analysis
+  script:
+    - make cpplint
 
 doctest:
   stage: Test
   script:
-    - python -m doctest -v gascamcontrol/*.py gascamcontrol/devices/*/*.py gascamcontrol/plugins/*.py
-
-#
-#
-#  clang-tidy
-#  cppcheck
-#  cpplint
-#  iwyu
-#
+    - make doctest
