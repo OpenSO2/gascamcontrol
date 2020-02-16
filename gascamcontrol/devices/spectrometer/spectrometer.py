@@ -36,7 +36,7 @@ class Spectrometer():
 
         visdriv = f"devices.spectrometer.drivers.{driver}.spectrometer"
         self.driver = importlib.import_module(visdriv)
-        self.spectrometer = self.driver.spectrometer()
+        self.spectrometer = self.driver.Spectrometer()
 
     async def __aenter__(self):
         return await self.start()
