@@ -1,5 +1,6 @@
 import pathlib
 import random
+import time
 
 
 def init(spectro):
@@ -18,6 +19,7 @@ def init(spectro):
 
 def get(spectro):
     """Get a spectrum."""
+    time.sleep(spectro.integration_time_micros/1E6)
     spectro.lastSpectrum = [v + random.randint(-1000, 1000)
                             for v in spectro._lastSpectrum]
 
