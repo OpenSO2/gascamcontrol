@@ -11,6 +11,7 @@
  *   exposure time = 12.4us + (n-1)*79.275us, n = 1..1055  =>  0.0124 .. 83.7268ms
  *   n = (exposure time - 12.4)/79.275 + 1
  */
+#include <iostream>
 #include<phx_api.h>
 #include<phx_os.h>
 #include"../camera.h"
@@ -19,7 +20,7 @@
 int set_mode_speed(tHandle, char, char[9]);
 int calc_mode_speed(double, double *, char *, char[9]);
 
-#include"exposure.c"
+#include"exposure.cpp"
 
 void internalCallback(tHandle hCamera, ui32 dwInterruptMask, void *params);
 static int sendMessage(tHandle hCamera, ui8 * inputBuffer);
@@ -52,7 +53,7 @@ int camera_get(sParameterStruct * sSO2Parameters, int waiter = 1)
 			usleep(1000);
 		}
 
-		sSO2Parameters->dBufferlength = 1376256; // FIXME, thats just weird
+		sSO2Parameters->dBufferlength = 1376256;  // FIXME, thats just weird
 		sSO2Parameters->stBufferSize = 1376256*2;
 		sSO2Parameters->width = 1344;
 		sSO2Parameters->height = 1024;
@@ -116,13 +117,13 @@ int calc_mode_speed(double exposureTime, double *actualExposureTime, char *m, ch
 		n = round((exposureTime - 12.4) / 79.275 + 1);
 		sprintf(speed, "SHT %d\r", n);
 		*m = 'S';
-		*actualExposureTime = 12.4 + (n - 1) * 79.275, n;
+		*actualExposureTime = 12.4 + (n - 1) * 79.275;
 	} else {
 		/* FRAME BLANKING, number of frames: 1 - 12 */
 		n = round(exposureTime / 83700.);
 		sprintf(speed, "FBL %d\r", n);
 		*m = 'F';
-		*actualExposureTime = n * 83700, n;
+		*actualExposureTime = n * 83700;
 	}
 	return 0;
 }

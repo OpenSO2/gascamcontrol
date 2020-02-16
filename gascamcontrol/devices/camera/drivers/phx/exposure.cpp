@@ -11,8 +11,7 @@
  * For a nice overview of automatic exposure algorithms see eg.
  * Michael Muehlebach "Camera Auto Exposure Control for VSLAM Applications", Swiss Federal Institute of Technology, 2010
  */
-#include<stdio.h>
-#include<string.h>
+#include<iostream>
 #include "../camera.h"
 
 #define MAX_EXPOSURETIME 1004400
@@ -30,16 +29,16 @@ double getExposureTime(sParameterStruct * sSO2Parameters)
 	int status = 0;
 	if (sSO2Parameters->dFixTime != 0) {
 		/* Check if exposure time is declared fix in the config file and if so, set it */
-		printf("Set program to use a fix exposure time, %i \n", sSO2Parameters->dFixTime);
+		std::cout << "Set program to use a fix exposure time " << sSO2Parameters->dFixTime << "\n";
 		if (sSO2Parameters->identifier == 'a')
 			exposure = sSO2Parameters->dExposureTime_a;
 		else
 			exposure = sSO2Parameters->dExposureTime_b;
 	} else {
-		printf("Find exposure \n");
+		std::cout << "Find exposure \n";
 		status = find_ettr(&exposure, sSO2Parameters);
 		if (status) {
-			fprintf(stderr, "could not find exposure (ETTR) \n");
+			std::cerr << "could not find exposure (ETTR) \n";
 			return status;
 		}
 	}
@@ -63,7 +62,6 @@ int find_ettr(double *exposure, sParameterStruct * sSO2Parameters)
 	*exposure = sSO2Parameters->dExposureTime;
 
 	do {
-
 		/* because the continues exposure time value maps to a finite set of
 		 * discrete values (either frames in frameblanking mode or a number
 		 * in the electronic shutter) there will be cases where the exposure
@@ -75,7 +73,7 @@ int find_ettr(double *exposure, sParameterStruct * sSO2Parameters)
 		calc_mode_speed(*exposure, &actualExposure, &m, speed);
 
 		if (m == lastm && strncmp(speed, lastspeed, 9) == 0) {
-			printf("change in calculated exposure is lower than the amount that the camera can actually change by, so this is good enough. \n");
+			std::cout << "change in calculated exposure is lower than the amount that the camera can actually change by, so this is good enough. \n";
 			/* unfortunately, this gets even more complicated
 			 * If this image was overexposed, we are now stuck with blown
 			 * out highlights, or in other words, loss of data. Unfortunately
@@ -84,7 +82,7 @@ int find_ettr(double *exposure, sParameterStruct * sSO2Parameters)
 			 * to the last known underexposed value.
 			 */
 			if (relative_exposure == 1) {
-				printf("calculated value was overexposed, reverting to last known underexposed value \n");
+				std::cout << "calculated value was overexposed, reverting to last known underexposed value \n";
 				*exposure = underexposed;
 			}
 			break;
@@ -93,15 +91,15 @@ int find_ettr(double *exposure, sParameterStruct * sSO2Parameters)
 		strncpy(lastspeed, speed, 9);
 
 		sSO2Parameters->dExposureTime = *exposure;
-		printf("find_ettr: camera_get %f \n", sSO2Parameters->dExposureTime);
+		std::cout << "find_ettr: camera_get %f \n" << sSO2Parameters->dExposureTime;
 		status = camera_setExposure(sSO2Parameters);
 		if (status != 0) {
-			fprintf(stderr, "unable to set exposure time \n");
+			std::cerr << "unable to set exposure time \n";
 			return status;
 		}
 		status = camera_get(sSO2Parameters, 1);
 		if (status != 0) {
-			fprintf(stderr, "could not get buffer for exposure control \n");
+			std::cerr << "could not get buffer for exposure control \n";
 			return status;
 		}
 
@@ -125,13 +123,13 @@ int find_ettr(double *exposure, sParameterStruct * sSO2Parameters)
 			if (overexposed > 0) {
 				*exposure = floor((*exposure + overexposed) / 2);
 			} else if (abs(*exposure - MAX_EXPOSURETIME) < 2) {
-				printf("image is still underexposed, but exposure time has reached its max value (%i of %i) \n", floor(*exposure), MAX_EXPOSURETIME);
+				std::cout << "image is still underexposed, but exposure time has reached its max value (" << floor(*exposure) << " of " << MAX_EXPOSURETIME << ")\n";
 				relative_exposure = 0;
 			} else {
 				*exposure = (*exposure * 2 < MAX_EXPOSURETIME) ? *exposure * 2 : MAX_EXPOSURETIME;
 			}
 		}
-		printf("relative_exposure %i %f \n", relative_exposure, *exposure);
+		std::cout << "relative_exposure %i %f \n" << relative_exposure << *exposure;
 	} while (relative_exposure);
 	return 0;
 }
@@ -190,7 +188,7 @@ int evalHist(sParameterStruct * sSO2Parameters, int *timeswitch)
 		sum += histogram[i];
 	}
 	if (sum < bufferlength * .0001) {
-		printf("image underexposed \n");
+		std::cout << "image underexposed \n";
 		*timeswitch = -1;
 		return 0;
 	}
@@ -201,7 +199,7 @@ int evalHist(sParameterStruct * sSO2Parameters, int *timeswitch)
 		sum += histogram[i];
 	}
 	if (sum > bufferlength * .0001) {
-		printf("image overexposed \n");
+		std::cout << "image overexposed \n";
 		*timeswitch = 1;
 		return 0;
 	}
@@ -214,7 +212,7 @@ int evalHist(sParameterStruct * sSO2Parameters, int *timeswitch)
 		sum += histogram[i];
 	}
 	if (sum < bufferlength / 2) {
-		printf("ETTR WARNING: scene might be poorly lit \n");
+		std::cout << "ETTR WARNING: scene might be poorly lit \n";
 	}
 
 	*timeswitch = 0;

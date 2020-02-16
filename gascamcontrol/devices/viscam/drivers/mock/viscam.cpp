@@ -2,8 +2,6 @@
 #include <unistd.h>
 #include "../viscam.h"
 
-using namespace std;
-
 static char *buffer;
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"

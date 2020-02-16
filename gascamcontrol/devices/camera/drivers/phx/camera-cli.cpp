@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	sSO2Parameters.dBufferlength = 1376256; // fixme this should be autoset
+	sSO2Parameters.dBufferlength = 1376256;  // fixme this should be autoset
 	sSO2Parameters.dFixTime = 0;
 	sSO2Parameters.dExposureTime_a = 250000;
 	sSO2Parameters.dExposureTime_b = 250000;
