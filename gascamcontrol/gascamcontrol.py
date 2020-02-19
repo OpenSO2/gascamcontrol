@@ -113,7 +113,8 @@ class Gascamcontrol():
         #         sign, lambda s=s: asyncio.create_task(self.shutdown()))
 
         self.devices.start()
-        self.pluginmanager.init()
+
+        self.loop.create_task(self.pluginmanager.init())
 
         try:
             self.loop.run_forever()

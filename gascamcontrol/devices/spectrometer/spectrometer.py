@@ -32,7 +32,7 @@ class Spectrometer():
     def __init__(self, driver):
         self.drivername = driver
         self.loop = asyncio.get_event_loop()
-        self.logger = logging.getLogger('myLog')
+        self.logging = logging.getLogger('myLog')
 
         visdriv = f"devices.spectrometer.drivers.{driver}.spectrometer"
         self.driver = importlib.import_module(visdriv)
@@ -49,10 +49,11 @@ class Spectrometer():
         status = await self.loop.run_in_executor(
             ThreadPoolExecutor(), self.driver.init, self.spectrometer)
 
+        self.logging.debug("spectrometer start")
+
         if status:
             # fixme
             print(f"ERRROROROR {status}")
-        return self
 
     async def get(self, exposure):
         """Get a single spectrum."""

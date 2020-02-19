@@ -67,15 +67,13 @@ class Spectrometry():
 
     async def init(self):
         """Initialize spectrometry and spectrometer."""
-        status = await self.spectrometer.start()
-        if status:
-            self.logging.error("init spectrometry failed")
+        await self.spectrometer.start()
 
         self.spectrum_length = self.spectrometer.spectrometer.spectrum_length
         return self
 
     def calc_exposure(self, wavelengths, spectrum):
-        """Calculate the absolute exposure of the spectrum in the region of interest.
+        """Calculate absolute exposure in the region of interest.
 
         For SO2 measurements, the roi is between 300 and 325nm.
         """
@@ -87,7 +85,7 @@ class Spectrometry():
         return max(roi_spectrum)  # should be something between 0..max
 
     def find_exposure_time(self, wavelengths, spectrum):
-        """Calculate the optimal integration time in the relevant spectral region.
+        """Calculate the optimal exposure time in the relevant spectral region.
 
         The saturation T of a detector pixel P is defined as:
                C(P)

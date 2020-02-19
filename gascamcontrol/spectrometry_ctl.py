@@ -7,16 +7,16 @@ from spectrometry import Spectrometry
 import conf
 
 
-def save_spectrum(outfile, wavelengths, data):
-    """Save spectrum to outfile."""
-    with open(outfile, "wt") as csvfile:
+def save_spectrum(filename, wavelengths, data):
+    """Save spectrum to file."""
+    with open(filename, "wt") as csvfile:
         writer = csv.writer(csvfile)
         for dat in zip(wavelengths, data):
             writer.writerow(dat)
 
 
 async def get_spectrum(driver, outfile):
-    """Set single uncorrected spectrum."""
+    """Get single uncorrected spectrum."""
     async with Spectrometry(driver) as spectrometry:
         await spectrometry.calibrate()
 
