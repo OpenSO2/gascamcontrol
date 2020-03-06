@@ -89,7 +89,7 @@ class Conf():
         self.parser.add("--simpletui", action="store_true",
                         help="No interface, just log msgs.")
 
-        self.options, _ = self.parser.parse_known_args()
+        self.options = self.parser.parse_args()
 
         # validate
         # TODO:
