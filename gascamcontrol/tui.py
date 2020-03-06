@@ -22,7 +22,7 @@ class CursesHandler(logging.Handler):
         self.screen.refresh()
 
 
-class Tui():
+class Tui:
     """Implement Text User Interface using curses."""
 
     _loglevel = logging.DEBUG
@@ -32,7 +32,7 @@ class Tui():
         self.maxy = None
         self.padding = None
         self.stdscr = None
-        self.logger = logging.getLogger('myLog')
+        self.logger = logging.getLogger(__name__)
         self.logging = self.logger
         self._status_win = None
         self.queue = Queue()
@@ -127,13 +127,14 @@ class Tui():
         win.refresh()
         return win
 
-    def connect_logger_to_window(self, win, loggername='myLog'):
+    def connect_logger_to_window(self, win):
         """Route logger output to logger window."""
         handler = CursesHandler(win)
         formatter_display = logging.Formatter(
-            '%(asctime)-8s | %(levelname)-7s | %(message)-s', '%H:%M:%S')
+            '%(asctime)-8s | %(name)s | %(levelname)-7s | %(message)-s',
+            '%H:%M:%S')
         handler.setFormatter(formatter_display)
-        logger = logging.getLogger(loggername)
+        logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
         logger.addHandler(handler)
 

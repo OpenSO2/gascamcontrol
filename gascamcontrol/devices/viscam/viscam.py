@@ -25,7 +25,7 @@ def _setup():
 _setup()
 
 
-class Viscam():
+class Viscam:
     """Define an interface for a visual camera (eg. webcam).
 
     Delegates the actual implementation to the drivers in ./drivers.
@@ -35,9 +35,9 @@ class Viscam():
         self.options = conf.Conf().options
         self.drivername = driver or self.options.viscam_driver
         self.loop = asyncio.get_event_loop()
-        self.logging = logging.getLogger('myLog')
-        visdriv = f"devices.viscam.drivers.{self.drivername}.viscam"
-        self.driver = importlib.import_module(visdriv)
+        self.logging = logging.getLogger(__name__)
+        driver = f"devices.viscam.drivers.{self.drivername}.viscam"
+        self.driver = importlib.import_module(driver)
         self.viscam = self.driver.viscam()
 
     async def __aenter__(self):
@@ -51,6 +51,7 @@ class Viscam():
         state = await self.loop.run_in_executor(ThreadPoolExecutor(),
                                                 self.driver.init, self.viscam)
         if state:
+            # fixme
             self.logging.error("error init viscam")
         return self
 

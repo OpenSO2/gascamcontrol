@@ -33,7 +33,7 @@ class Plugin(BasePlugin):
             "altitude": None
         }
         self.gps_watch = None
-        self.logging = logging.getLogger("myLog")
+        self.logging = logging.getLogger(__name__)
         self.loop = asyncio.get_event_loop()
 
     async def init(self):

@@ -36,7 +36,7 @@ class Cameras():
 
     def __init__(self):
         self.cameras = []
-        self.logger = logging.getLogger('myLog')
+        self.logger = logging.getLogger(__name__)
         self.logging = self.logger
         self.logger.info("initialize cameras")
 
@@ -74,7 +74,8 @@ class Cameras():
         return await asyncio.gather(*camera_tasks)
 
     async def uninit(self):
-        """Unitialize all cameras."""
+        """Stop and tear down all cameras."""
+        self.logger.debug("uninit cams")
         camera_tasks = [cameras.stop() for cameras in self.cameras]
         self.cameras = await asyncio.gather(*camera_tasks)
         self.logger.info("uninit cams done")
@@ -85,4 +86,5 @@ class Cameras():
         return self
 
     async def __aexit__(self, *args):
+        self.logger.debug("aexit cams")
         await self.uninit()

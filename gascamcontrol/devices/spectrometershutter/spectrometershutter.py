@@ -50,7 +50,7 @@ class Spectrometershutter():
         self.drivername = driver
         self.conf = conf.Conf().options
         self.loop = asyncio.get_event_loop()
-        self.logging = logging.getLogger('myLog')
+        self.logging = logging.getLogger(__name__)
 
         driver = (f"devices.spectrometershutter.drivers."
                   f"{self.drivername}.spectrometershutter")

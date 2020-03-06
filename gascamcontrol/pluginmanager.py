@@ -34,7 +34,7 @@ class Pluginmanager():
 
     def __init__(self):
         self.loop = asyncio.get_event_loop()
-        self.logging = logging.getLogger("myLog")
+        self.logging = logging.getLogger(__name__)
         self.options = conf.Conf().options
 
         self.plugins = [import_module(f"{_PLUGIN_PATH}.{name}.plugin").Plugin()

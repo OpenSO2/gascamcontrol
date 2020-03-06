@@ -18,7 +18,7 @@ def _setup():
 _setup()
 
 
-class StreamToLogger():
+class StreamToLogger:
     """Redirect print to a logger instance."""
 
     def __init__(self, logger, log_level=logging.INFO):
@@ -36,12 +36,14 @@ class StreamToLogger():
         self.write(buf)
 
 
-class Log():
+class Log:
     """Configure and init logging."""
 
-    def __init__(self, loggername):
-        self.loggername = loggername
-        self.logger = logging.getLogger(self.loggername)
+    def __init__(self):
+        self.stdout = sys.stdout
+        self.stderr = sys.stderr
+
+        self.logger = logging.getLogger()
         self.options = conf.Conf().options
         self.route_to_file()
         self.route_print()
@@ -56,6 +58,17 @@ class Log():
 
         sys.stdout = StreamToLogger(self.logger, logging.INFO)
         sys.stderr = StreamToLogger(self.logger, logging.ERROR)
+
+    def route_to_stdout(self):
+        root = logging.getLogger()
+        root.setLevel(logging.DEBUG)
+
+        handler = logging.StreamHandler(self.stdout)
+        handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        root.addHandler(handler)
 
     def route_to_file(self):
         """Route logs to logfile (even debug messages)."""

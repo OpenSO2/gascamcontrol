@@ -33,7 +33,7 @@ class Camerashutter():
     def __init__(self, driver, device):
         self.drivername = driver
         self.loop = asyncio.get_event_loop()
-        self.logger = logging.getLogger('myLog')
+        self.logger = logging.getLogger(__name__)
 
         driver = f"devices.camerashutter.drivers.{driver}.camerashutter"
         self.driver = importlib.import_module(driver)
