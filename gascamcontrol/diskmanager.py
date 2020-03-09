@@ -50,7 +50,7 @@ class Diskmanager():
             Diskmanager.__monostate = self.__dict__
 
             self.loop = asyncio.get_event_loop()
-            self.logging = logging.getLogger("myLog")
+            self.logging = logging.getLogger(__name__)
             self.options = conf.Conf().options
             self.noofimages = 0
             self.noofviscam = 0
