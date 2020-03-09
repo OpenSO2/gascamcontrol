@@ -18,7 +18,8 @@ class CursesHandler(logging.Handler):
     def emit(self, record):
         """Render record to screen."""
         msg = self.format(record)
-        self.screen.addstr("\n{}".format(msg))
+        colorpair = curses.color_pair(int(record.levelno > 20))
+        self.screen.addstr(f"\n{msg}", colorpair)
         self.screen.refresh()
 
 
@@ -69,6 +70,9 @@ class Tui:
         self.info_win()
 
         self.connect_logger_to_window(log_win)
+
+        curses.init_pair(1, curses.COLOR_RED, curses.COLOR_WHITE)
+
         return self
 
     @property

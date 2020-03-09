@@ -2,6 +2,7 @@
 import logging
 import sys
 import configargparse
+import colorlog
 import conf
 
 
@@ -60,14 +61,22 @@ class Log:
         sys.stderr = StreamToLogger(self.logger, logging.ERROR)
 
     def route_to_stdout(self):
+
+        log_format = (
+            '%(log_color)s'
+            '%(asctime)s - '
+            '%(name)s - '
+            '%(funcName)s - '
+            '%(levelname)s - '
+            '%(message)s'
+        )
+
         root = logging.getLogger()
         root.setLevel(logging.DEBUG)
-
         handler = logging.StreamHandler(self.stdout)
         handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
+        handler.setFormatter(colorlog.ColoredFormatter(log_format))
+
         root.addHandler(handler)
 
     def route_to_file(self):
