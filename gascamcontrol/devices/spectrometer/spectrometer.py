@@ -1,13 +1,10 @@
-"""Manage viscam.
-
-Viscam are auxilary visual cameras (think cheap webcams) that are
-not part of the main measurement.
-"""
+"""Manage spectrometer."""
 import importlib
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import logging
 import configargparse
+import conf
 
 
 def _setup():
@@ -23,19 +20,21 @@ def _setup():
 _setup()
 
 
-class Spectrometer():
+class Spectrometer:
     """Define an interface for a spectrometer.
 
     Delegates the actual implementation to the drivers in ./drivers.
     """
 
-    def __init__(self, driver):
-        self.drivername = driver
-        self.loop = asyncio.get_event_loop()
-        self.logging = logging.getLogger('myLog')
+    def __init__(self, driver=None):
+        self.options = conf.Conf().options
 
-        visdriv = f"devices.spectrometer.drivers.{driver}.spectrometer"
-        self.driver = importlib.import_module(visdriv)
+        self.drivername = driver or self.options.spectrometer_driver
+        self.loop = asyncio.get_event_loop()
+        self.logging = logging.getLogger(__name__)
+
+        driv = f"devices.spectrometer.drivers.{self.drivername}.spectrometer"
+        self.driver = importlib.import_module(driv)
         self.spectrometer = self.driver.Spectrometer()
 
     async def __aenter__(self):
@@ -52,8 +51,8 @@ class Spectrometer():
         self.logging.debug("spectrometer start")
 
         if status:
-            # fixme
-            print(f"ERRROROROR {status}")
+            raise Exception("Failed to start spectrometer")
+        return self
 
     async def get(self, exposure):
         """Get a single spectrum."""
