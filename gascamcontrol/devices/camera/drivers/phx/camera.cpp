@@ -57,6 +57,7 @@ int camera_get(sParameterStruct * sSO2Parameters, int waiter = 1)
 		sSO2Parameters->stBufferSize = 1376256*2;
 		sSO2Parameters->width = 1344;
 		sSO2Parameters->height = 1024;
+		sSO2Parameters->depth = 12;
 
 		camera_abort(sSO2Parameters);
 	}

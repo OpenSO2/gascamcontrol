@@ -35,6 +35,7 @@ typedef struct {
 
 	int width;
 	int height;
+	int depth;
 
 	/* Pointer to image buffer */
 	short *stBuffer;

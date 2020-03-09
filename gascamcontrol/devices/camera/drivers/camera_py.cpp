@@ -23,6 +23,7 @@ PYBIND11_MODULE(camera, m) {
         .def(pybind11::init<>())
         .def_property("width", [](sParameterStruct * vc) {return vc->width;}, []() {})
         .def_property("height", [](sParameterStruct * vc) {return vc->height;}, []() {})
+        .def_property("depth", [](sParameterStruct * vc) {return vc->depth;}, []() {})
         .def_property("buffer", &getBuffer, []() {})
         .def_property("exposuretime", [](sParameterStruct * vc) {return vc->exposuretime;}, [](sParameterStruct * vc, int exposuretime) {vc->exposuretime = exposuretime;})
         .def_property("identifier", [](sParameterStruct * vc) {return vc->identifier;}, [](sParameterStruct * vc, char identifier) {vc->identifier = identifier;})

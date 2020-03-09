@@ -26,7 +26,7 @@ class Camera():
         self.drivername = driver
         self.identifier = identifier
         self.loop = asyncio.get_event_loop()
-        self.logger = logging.getLogger('myLog')
+        self.logger = logging.getLogger(__name__)
         self.logging = self.logger
         self.logging.info("init camera %s %s", driver, identifier)
 
@@ -76,8 +76,13 @@ class Camera():
 
         shape = (self.camera.height, self.camera.width, 1)
         img = np.reshape(np.array(self.camera.buffer), shape).astype(np.uint16)
-        meta = {}
-        meta["date"] = datetime.datetime.now()
+        meta = {
+            "id": self.identifier,
+            "date": datetime.datetime.now(),
+            "height": self.camera.height,
+            "width": self.camera.width,
+            "depth": self.camera.depth
+        }
         return img, meta
 
     async def stop(self):
