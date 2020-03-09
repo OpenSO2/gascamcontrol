@@ -15,9 +15,9 @@ def save_spectrum(filename, wavelengths, data):
             writer.writerow(dat)
 
 
-async def get_spectrum(driver, outfile):
+async def get_spectrum(outfile):
     """Get single uncorrected spectrum."""
-    async with Spectrometry(driver) as spectrometry:
+    async with Spectrometry() as spectrometry:
         await spectrometry.calibrate()
 
         save_spectrum("dark-current.dat", spectrometry.wavelengths,
@@ -33,8 +33,7 @@ async def get_spectrum(driver, outfile):
                                                        spectrum)
 
         print("Exposure was {} ({}ms), optimal exposure time would be {} ms. "
-              "Noise was {} ".format(exposure,
-                                     spectrometry.exposure_ms,
+              "Noise was {} ".format(exposure, spectrometry.exposure_us,
                                      exposure_opt, noise))
 
         save_spectrum(outfile, spectrometry.wavelengths, spectrum)
@@ -54,8 +53,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG if options.debug else logging.INFO)
 
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(get_spectrum(options.spectrometer_driver,
-                                         options.outfile))
+    loop.run_until_complete(get_spectrum(options.outfile))
 
 
 if __name__ == "__main__":

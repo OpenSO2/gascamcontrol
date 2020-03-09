@@ -28,7 +28,7 @@ class Queue():
             Queue.__monostate = self.__dict__
 
             self.queue = asyncio.Queue()
-            self.logging = logging.getLogger("myLog")
+            self.logging = logging.getLogger(__name__)
 
     def __len__(self):
         return self.queue.qsize()
@@ -43,12 +43,12 @@ class Queue():
         """Retrieve highest priority task from queue."""
         return await self.queue.get()
 
-    def join(self):
+    async def join(self):
         """Wait for queue to be emptied (blocking)."""
-        self.queue.join()
+        await self.queue.join()
 
 
-class QueueItem():  # pylint: disable=R0903
+class QueueItem:  # pylint: disable=R0903
     """Wrap data that has been queued for processing."""
 
     def __init__(self, data, meta):

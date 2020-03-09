@@ -12,7 +12,7 @@ SCRIPT_DIR = os.path.dirname(TOPLEVELPATH)
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 from devices.spectrometer.spectrometer import Spectrometer  # noqa: E402,E501 pylint: disable=C0413,E0401
-
+import conf
 
 EXPOSURE = 4000000
 SCANS = 1
@@ -30,7 +30,7 @@ def shutdown():
     sys.exit(0)
 
 
-async def plot(driver):
+async def plot():
     """Plot indefinitely."""
     plt.ion()
     fig = plt.figure()
@@ -44,7 +44,7 @@ async def plot(driver):
 
     axplt = False
 
-    async with Spectrometer(driver) as spectrometer:
+    async with Spectrometer() as spectrometer:
         while 1:  # plot indefinitely
             wvl, data = await spectrometer.get(EXPOSURE)
             if not axplt:
@@ -61,10 +61,12 @@ def main():
 
     parser = configargparse.get_argument_parser()
     parser.description = 'Spectrometer live viewer'
+
     options = parser.parse_args()
+    conf.Conf().options = options
 
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(plot(options.spectrometer_driver))
+    loop.run_until_complete(plot())
 
 
 if __name__ == "__main__":
