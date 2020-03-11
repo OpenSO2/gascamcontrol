@@ -17,7 +17,7 @@ def _setup():
 
     parser.add("--disableWebcam", action="store_true",
                help="Disable processing and saving of webcam images")
-    parser.add("--disableSpectroscopy", action="store_true",
+    parser.add("--disableSpectrometry", action="store_true",
                help="Disable processing and saving of spectra")
     parser.add("--max_image_sets", default=-1,
                help="Only take N image sets and exit")
@@ -31,7 +31,7 @@ def _setup():
 _setup()
 
 
-class Devicemanager():
+class Devicemanager:
     """Manage Device tasks."""
 
     __monostate = None  # borg pattern
@@ -43,10 +43,10 @@ class Devicemanager():
             Devicemanager.__monostate = self.__dict__
 
             self.running = False
-            self.task_names = ["cameras", "viscam", "spectroscopy"]
+            self.task_names = ["cameras", "viscam", "spectrometry"]
             self.loop = asyncio.get_event_loop()
-            self.logging = logging.getLogger("myLog")
-            self.running_tasks = []
+            self.logging = logging.getLogger(__name__)
+            self.running_tasks = {}
             self.options = conf.Conf().options
             self.queue = Queue()
             self.noofimages = 0
@@ -99,24 +99,29 @@ class Devicemanager():
                 except asyncio.CancelledError:
                     self.logging.warning("Got CancelledError cameras")
                     break
-                except Exception:
-                    self.logging.error("exception caught", exc_info=True)
-                    raise
 
-    async def spectroscopy(self):
-        """Run spectroscopy and put spectra into queue."""
-        async with Spectrometry as spectrometry:
+    async def spectrometry(self):
+        """Run spectrometry and put spectra into queue."""
+        #
+        # FIXME: cli arg skip calibration
+        # FIXME: cli arg recal interval
+        #
+
+        async with Spectrometry() as spectrometry:
+            self.logging.info("start spectrometry calibration")
             await spectrometry.calibrate()
+            self.logging.info("spectrometry calibrated")
             while True:
                 try:
-                    wavelengths, spectrum = spectrometry.measure()
+                    wavelengths, spectrum = await spectrometry.measure()
                     meta = {
                         type: "spectrum"
                     }
                     await self.queue.push(SpecQueueItem(wavelengths,
                                                         spectrum, meta))
                 except asyncio.CancelledError:
-                    self.logging.warning("Got CancelledError spectroscopy")
+                    self.logging.warning("Got CancelledError spectrometry")
+                    break
 
     def start(self):
         """Set running flag to true and start tasks.
@@ -127,25 +132,35 @@ class Devicemanager():
         self.logging.info("all devices: %s", task_names)
         if self.options.disableWebcam:
             task_names.remove("viscam")
-        if self.options.disableSpectroscopy:
-            task_names.remove("spectroscopy")
+        if self.options.disableSpectrometry:
+            task_names.remove("spectrometry")
 
         task_names = list(set(task_names) - set(self.running_tasks))
 
         self.logging.info("start devices: %s", task_names)
-        self.running_tasks = [self.loop.create_task(getattr(self, task_name)())
-                              for task_name in task_names]
+
+        for task_name in self.task_names:
+            task = self.loop.create_task(getattr(self, task_name)())
+            self.running_tasks[task_name] = id(task)
+
         self.running = True
 
-    def stop(self):
+    async def stop(self):
         """Set running flag to false, tasks will stop themself.
 
         This ONLY stops devices, not other tasks.
         """
-        for task in self.running_tasks:
-            self.logging.info('cancel task %s', task)
-            self.running_tasks.remove(task)
+        # Find all running device tasks:
+        pending = asyncio.Task.all_tasks()
+        tasks = [task for task in pending if id(task) in self.running_tasks]
+        task_ids = {v: k for k, v in self.running_tasks.items()}
+
+        self.logging.debug("stop %i devices '%s'", len(tasks), ", ".join(tasks))
+
+        for task in tasks:
+            self.logging.debug('cancel device task %s', task)
             task.cancel()
-            self.logging.info('canceled')
+            self.running_tasks.remove(task_ids(id(task)))
 
         self.running = False
+        self.logging.info("stopped devices")

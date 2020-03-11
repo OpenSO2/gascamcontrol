@@ -1,5 +1,5 @@
 import asyncio
-# import signal
+import signal
 import logging
 import log
 import tui
@@ -19,7 +19,7 @@ class Gascamcontrol():
         self.conf.parse()
         self.options = self.conf.options
 
-        self.logging = logging.getLogger("myLog")
+        self.logging = logging.getLogger(__name__)
         self.tui = tui.Tui()
         self.diskmanager = diskmanager.Diskmanager()
         self.comm = comm.Comm()
@@ -54,15 +54,17 @@ class Gascamcontrol():
 #                print("Got CancelledError monitor_kbd")
 #                break
 
-    def shutdown(self):
+    async def shutdown(self, signal=None):
         """Stop application, kill background tasks, stop devices, cleanup."""
-        self.logging.info('received stop signal, cancelling tasks...')
+        if signal:
+            self.logging.info("Received exit signal %s", signal.name)
 
-        self.pluginmanager.uninit()
-        self.devices.stop()
+        await self.pluginmanager.uninit()
+        await self.devices.stop()
 
         # Find all running tasks:
         pending = asyncio.Task.all_tasks()
+        pending.remove(asyncio.current_task())
 
         for task in pending:
             self.logging.info('cancel task %s', task)
@@ -73,12 +75,11 @@ class Gascamcontrol():
 
         # Run loop until tasks done:
         self.logging.info("\n run_until_complete")
-        # loop.close()
+
+        await self.queue.join()
+
         self.loop.stop()
-
-        self.queue.join()
-
-        self.logging.info("loop closed")
+        self.logging.info("shutdown complete")
 
     async def monitor_tui(self):
         """Update text user interface."""
@@ -91,36 +92,37 @@ class Gascamcontrol():
                 self.logging.info("Got CancelledError tui")
                 break
 
+    def handle_exception(self, loop, context):
+        # context["message"] will always be there; but context["exception"] may not
+        logging.error(f"Caught exception: {context}", exc_info=1)
+        logging.info("Shutting down...")
+        self.loop.create_task(self.shutdown())
+
     def startup(self):
         """Start application."""
+        self.log = log.Log()
         if self.options.simpletui:
-            logging.basicConfig(level=logging.DEBUG)
+            self.log.route_to_stdout()
         else:
             self.tui.startup()
-            log.Log('myLog')
-#            self.loop.create_task(self.monitor_kbd())
             self.loop.create_task(self.monitor_tui())
+
+        signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
+        for s in signals:
+            self.loop.add_signal_handler(
+                s, lambda s=s: asyncio.create_task(self.shutdown(s)))
+        self.loop.set_exception_handler(self.handle_exception)
 
         self.logging.info("consume queue:")
         self.loop.create_task(self.consume_queue())
         self.logging.info("consume queue task started")
         self.comm.run()
         # self.display.run()
-
-        # signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
-        # for sign in signals:
-        #     self.loop.add_signal_handler(
-        #         sign, lambda s=s: asyncio.create_task(self.shutdown()))
-
         self.devices.start()
 
         self.loop.create_task(self.pluginmanager.init())
 
-        try:
-            self.loop.run_forever()
-        finally:
-            print("Closing Loop")
-            self.loop.close()
+        self.loop.run_forever()
 
 
 def main():
