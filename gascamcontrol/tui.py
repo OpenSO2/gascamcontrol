@@ -47,19 +47,11 @@ class Tui:
     def setupscreen(self, stdscr):
         """Initiate and layout screen, start windows."""
         self.stdscr = stdscr
-        curses.noecho()
-        curses.cbreak()
-        curses.setsyx(-1, -1)
-
-        maxy, maxx = stdscr.getmaxyx()
-        self.maxy = maxy
-        self.maxx = maxx
-
-        stdscr.keypad(True)
+        self.maxy, self.maxx = stdscr.getmaxyx()
         stdscr.nodelay(1)
+
         title = "SO2 Camera"
-        stdscr.addstr(0, (maxx - len(title)) // 2, title)
-        stdscr.refresh()
+        stdscr.addstr(0, (self.maxx - len(title)) // 2, title)
 
         padding = 2
         self.padding = padding
@@ -73,7 +65,7 @@ class Tui:
 
         curses.init_pair(1, curses.COLOR_RED, curses.COLOR_WHITE)
 
-        return self
+        stdscr.refresh()
 
     @property
     def loglevel(self):
@@ -133,14 +125,14 @@ class Tui:
 
     def connect_logger_to_window(self, win):
         """Route logger output to logger window."""
-        handler = CursesHandler(win)
+        self.curses_handler = CursesHandler(win)
         formatter_display = logging.Formatter(
             '%(asctime)-8s | %(name)s | %(levelname)-7s | %(message)-s',
             '%H:%M:%S')
-        handler.setFormatter(formatter_display)
+        self.curses_handler.setFormatter(formatter_display)
         logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
-        logger.addHandler(handler)
+        logger.addHandler(self.curses_handler)
 
     def ctrl_win(self):
         """Control window listing available commands."""
@@ -182,7 +174,7 @@ class Tui:
         """Status window showing system status information."""
         if not self._status_win:
             height = self.maxy // 2 - self.padding
-            width = (self.maxx) // 2 - self.padding
+            width = self.maxx // 2 - self.padding
             offset_y = self.padding
             offset_x = self.padding + self.maxx // 2
 
@@ -204,3 +196,15 @@ class Tui:
         #     6, 1, f"Last image set created: {len(self.queue)}")
         self._status_win.refresh()
         self.stdscr.refresh()
+
+    def restore(self):
+        """Reset terminal to original state.
+
+        Exceptions from outside will not trigger curses.wrapper cleanup, so
+        this is needed to reset manually."""
+        self.logging.info("reset terminal...")
+        logging.getLogger().removeHandler(self.curses_handler)
+        self.stdscr.keypad(0)
+        curses.echo()
+        curses.nocbreak()
+        curses.endwin()

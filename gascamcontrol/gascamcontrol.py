@@ -78,6 +78,9 @@ class Gascamcontrol():
 
         await self.queue.join()
 
+        if not self.options.simpletui:
+            self.tui.restore()
+
         self.loop.stop()
         self.logging.info("shutdown complete")
 
