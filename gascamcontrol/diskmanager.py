@@ -78,7 +78,7 @@ class Diskmanager():
 
         self.noofimages += 1
 
-    async def viscam_save(self, item):
+    async def save_viscam(self, item):
         """Save a viscam image."""
         date = str(item.meta['date'])
         filename = f"{self.options.imagePath}/viscam-{date}.jpg"

@@ -61,10 +61,10 @@ class Devicemanager:
             while True:
                 try:
                     img, meta = await viscam.get()
-                    meta.type = "viscam"
+                    meta["type"] = "viscam"
                     await self.queue.push(ViscamQueueItem(img, meta))
                 except asyncio.CancelledError:
-                    self.logging.warning("Got CancelledError monitor_viscam")
+                    self.logging.warning("Got CancelledError viscam")
                     break
 
     async def cameras(self):
@@ -155,7 +155,8 @@ class Devicemanager:
         tasks = [task for task in pending if id(task) in self.running_tasks]
         task_ids = {v: k for k, v in self.running_tasks.items()}
 
-        self.logging.debug("stop %i devices '%s'", len(tasks), ", ".join(tasks))
+        self.logging.debug(
+            "stop %i devices '%s'", len(tasks), ", ".join(tasks))
 
         for task in tasks:
             self.logging.debug('cancel device task %s', task)

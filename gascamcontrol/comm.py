@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import json
 import aiohttp
 from aiohttp import web
 import configargparse
@@ -22,7 +23,7 @@ class Comm():
 
     def __init__(self):
         self.app = None
-        self.logger = logging.getLogger('myLog')
+        self.logger = logging.getLogger(__name__)
         self.loop = asyncio.get_event_loop()
         self.websockets = []
 
@@ -51,14 +52,16 @@ class Comm():
     async def send(self, item):
         """Send data to all clients."""
         for websocket in self.websockets:
-            # if "send" in websocket:
-            # await websocket.send_str(f"img shape {img.shape}")
-            # await websocket.send_bytes(img.tobytes())
-            self.logger.info("send data")
-            img = item.data
-            img *= 16
-            # logger.info(str(img.tolist()))
-            await websocket.send_bytes(img.tobytes())
+            meta = item.meta
+            meta["date"] = str(meta["date"])
+
+            metab = bytes(json.dumps(meta), "utf-8")
+            meta_len = bytes(str(len(metab)).rjust(4), "utf-8")
+            data = meta_len + metab + item.data.tobytes()
+
+            await websocket.send_bytes(data)
+            self.logger.debug("bytes send %i %s", len(data),
+                              str(len(metab)).rjust(4))
 
     @staticmethod
     def serve_display(app):

@@ -44,7 +44,9 @@ class Viscam:
         return await self.start()
 
     async def __aexit__(self, *args):
+        self.logging.debug("stopping viscam")
         await self.stop()
+        self.logging.debug("viscam stopped")
 
     async def start(self):
         """Initiate viscam device."""
@@ -61,7 +63,8 @@ class Viscam:
                                         self.driver.get, self.viscam)
 
         shape = (self.viscam.height, self.viscam.width, 3)
-        return np.reshape(self.viscam.buffer, shape)
+        meta = {}
+        return np.reshape(self.viscam.buffer, shape), meta
 
     async def stop(self):
         """Stop viscam and release device."""
