@@ -45,7 +45,12 @@ class Queue():
 
     async def join(self):
         """Wait for queue to be emptied (blocking)."""
-        await self.queue.join()
+        self.logging.debug("processing queue, %i items in queue",
+                           self.queue.qsize())
+        try:
+            await asyncio.wait_for(self.queue.join(), timeout=5)
+        except asyncio.TimeoutError:
+            self.logging.error("queue timed out")
 
 
 class QueueItem:  # pylint: disable=R0903
