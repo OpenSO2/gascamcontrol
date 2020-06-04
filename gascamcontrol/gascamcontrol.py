@@ -9,6 +9,7 @@ import comm
 import devicemanager
 from processingqueue import Queue
 import pluginmanager
+import traceback
 
 
 class Gascamcontrol():
@@ -59,11 +60,13 @@ class Gascamcontrol():
         if signal:
             self.logging.info("Received exit signal %s", signal.name)
 
+        self.logging.info("Shutting down...")
+
         await self.pluginmanager.uninit()
         await self.devices.stop()
 
         # Find all running tasks:
-        pending = asyncio.Task.all_tasks()
+        pending = asyncio.all_tasks()
         pending.remove(asyncio.current_task())
 
         for task in pending:
@@ -71,11 +74,10 @@ class Gascamcontrol():
             task.cancel()
             self.logging.info('canceled')
 
-        self.logging.info("tasks canceled, closing loop")
+        self.logging.info("all tasks canceled")
 
         # Run loop until tasks done:
-        self.logging.info("\n run_until_complete")
-
+        self.logging.debug("empty work queue")
         await self.queue.join()
 
         if not self.options.simpletui:
@@ -96,9 +98,11 @@ class Gascamcontrol():
                 break
 
     def handle_exception(self, loop, context):
-        # context["message"] will always be there; but context["exception"] may not
-        logging.error(f"Caught exception: {context}", exc_info=1)
-        logging.info("Shutting down...")
+        self.logging.error(f"Caught exception: {context}", exc_info=1)
+
+        if "exception" in context:
+            traceback.print_tb(context["exception"].__traceback__)
+
         self.loop.create_task(self.shutdown())
 
     def startup(self):
@@ -124,7 +128,7 @@ class Gascamcontrol():
         self.devices.start()
 
         self.loop.create_task(self.pluginmanager.init())
-
+        self.loop.set_debug(self.options.debug)
         self.loop.run_forever()
 
 

@@ -10,6 +10,7 @@ import logging
 import numpy as np
 import configargparse
 import conf
+import datetime
 
 
 def _setup():
@@ -63,7 +64,9 @@ class Viscam:
                                         self.driver.get, self.viscam)
 
         shape = (self.viscam.height, self.viscam.width, 3)
-        meta = {}
+        meta = {
+            "date": datetime.datetime.now(),
+        }
         return np.reshape(self.viscam.buffer, shape), meta
 
     async def stop(self):

@@ -151,7 +151,7 @@ class Devicemanager:
         This ONLY stops devices, not other tasks.
         """
         # Find all running device tasks:
-        pending = asyncio.Task.all_tasks()
+        pending = asyncio.all_tasks()
         tasks = [task for task in pending if id(task) in self.running_tasks]
         task_ids = {v: k for k, v in self.running_tasks.items()}
 
@@ -161,6 +161,7 @@ class Devicemanager:
         for task in tasks:
             self.logging.debug('cancel device task %s', task)
             task.cancel()
+            self.logging.debug('canceled device task %s', task)
             self.running_tasks.remove(task_ids(id(task)))
 
         self.running = False

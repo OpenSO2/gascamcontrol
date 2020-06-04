@@ -61,6 +61,7 @@ class Diskmanager():
 
     async def save_camera(self, item):
         """Sava a camera image."""
+        assert "date" in item.meta, "no date found in camera meta data"
         filename = f"{self.options.imagePath}/{str(item.meta['date'])}.png"
         self.logging.info("saving image to path %s", filename)
         img = item.data * 16  # fixme: should depend on depth
@@ -80,6 +81,8 @@ class Diskmanager():
 
     async def save_viscam(self, item):
         """Save a viscam image."""
+        assert "date" in item.meta, "no date found in viscam meta data"
+
         date = str(item.meta['date'])
         filename = f"{self.options.imagePath}/viscam-{date}.jpg"
         self.logging.debug("saving viscam image to path %s", filename)

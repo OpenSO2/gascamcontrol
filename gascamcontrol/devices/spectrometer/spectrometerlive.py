@@ -21,7 +21,7 @@ SCANS = 1
 def shutdown():
     """Kill program and cleanup."""
     loop = asyncio.get_event_loop()
-    pending = asyncio.Task.all_tasks()
+    pending = asyncio.all_tasks()
     for task in pending:
         task.cancel()
 
