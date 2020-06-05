@@ -2,25 +2,25 @@ doc:
 	pydoc
 
 flake8:
-	flake8 --exclude pybind11,gps,webapp
+	flake8 --exclude pybind11,gps,webapp,env
 
 pylint:
 	cd gascamcontrol; pylint --ignore=pybind11,webapp gascamcontrol
 
 pycodestyle:
-	pycodestyle --exclude pybind11,webapp,gps .
+	pycodestyle --exclude pybind11,webapp,gps,env .
 
 pydocstyle:
 	pydocstyle
 
 cppcheck:
-	cppcheck `find -name "*.cpp" -not -path "*/pybind11/*" -not -path "*/webapp/*"`
+	cd gascamcontrol; cppcheck `find -name "*.cpp" -not -path "*/pybind11/*" -not -path "*/webapp/*"`
 
 cpplint:
-	cpplint `find -name "*.cpp" -not -path "*/pybind11/*" -not -path "*/CMakeFiles/*" -not -path "*/webapp/*"`
+	cd gascamcontrol; cpplint `find -name "*.cpp" -not -path "*/pybind11/*" -not -path "*/CMakeFiles/*" -not -path "*/webapp/*"`
 
 clang-tidy:
-	clang-tidy `find -name "*.cpp" -not -path "*/pybind11/*" -not -path "*/webapp/*"`
+	cd gascamcontrol; clang-tidy `find -name "*.cpp" -not -path "*/pybind11/*" -not -path "*/webapp/*"`
 
 doctest:
 	python -m doctest -v gascamcontrol/*.py gascamcontrol/devices/*/*.py gascamcontrol/plugins/*.py

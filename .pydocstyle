@@ -8,4 +8,4 @@ ignore = D107,D203,D105,D213,D100,D104
 # D200 One-line docstring should fit on one line with quotes
 # D203 1 blank line required before class docstring
 # D105 Missing docstring in magic method
-match-dir = ^(?!pybind11|gps|graveyard|webapp).*
+match-dir = ^(?!pybind11|gps|graveyard|webapp|env).*

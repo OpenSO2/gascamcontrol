@@ -6,3 +6,12 @@ CMakeCache.txt
 cmake_install.cmake
 CMakeFiles
 *.so
+*.pyc
+pybind11
+env
+.idea
+*.delme
+*.bak
+*.log
+*.png
+*.dat
