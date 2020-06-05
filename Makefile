@@ -26,7 +26,7 @@ doctest:
 	python -m doctest -v gascamcontrol/*.py gascamcontrol/devices/*/*.py gascamcontrol/plugins/*.py
 
 pytest:
-	cd gascamcontrol; pytest --ignore-glob="*/pybind11/*" --ignore=webapp --ignore plugins/gps --ignore devices/spectrometer/drivers/oceanoptics/spectrometer.py --ignore devices/spectrometer/drivers/mock/spectrometer.py
+	python -m pytest tests
 
 coverage:
 	cd gascamcontrol; pytest --cov=myproj --ignore-glob="*/pybind11/*" --ignore=webapp --ignore plugins/gps --ignore devices/spectrometer/drivers/oceanoptics/spectrometer.py --ignore devices/spectrometer/drivers/mock/spectrometer.py
@@ -35,7 +35,4 @@ coverage2:
 	cd gascamcontrol; coverage run -m pytest --ignore-glob="*/pybind11/*" --ignore=webapp --ignore plugins/gps --ignore devices/spectrometer/drivers/oceanoptics/spectrometer.py --ignore devices/spectrometer/drivers/mock/spectrometer.py
 
 lint: flake8 pylint pycodestyle pydocstyle cppcheck cpplint
-test: doctest
-
-
-# pychecker
+test: doctest pytest
