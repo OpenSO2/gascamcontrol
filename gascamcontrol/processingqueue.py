@@ -16,7 +16,7 @@ import logging
 # data
 
 
-class Queue():
+class Queue:
     """Manage tasks to run (eg. writing to disk etc)."""
 
     __monostate = None  # borg pattern
@@ -36,8 +36,8 @@ class Queue():
     async def push(self, task):
         """Queue task."""
         await self.queue.put(task)
-        self.logging.info("add task to queue qsize %s %s",
-                          self.queue.qsize(), len(self))
+        self.logging.debug("add task to queue qsize %s %s",
+                           self.queue.qsize(), len(self))
 
     async def pop(self):
         """Retrieve highest priority task from queue."""

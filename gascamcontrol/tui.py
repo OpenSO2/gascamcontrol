@@ -39,6 +39,7 @@ class Tui:
         self.queue = Queue()
         self.devicemanager = devicemanager.Devicemanager()
         self.diskmanager = diskmanager.Diskmanager()
+        self.curses_handler = None
 
     def startup(self):
         """Initiate curses."""
@@ -201,7 +202,8 @@ class Tui:
         """Reset terminal to original state.
 
         Exceptions from outside will not trigger curses.wrapper cleanup, so
-        this is needed to reset manually."""
+        this is needed to reset manually.
+        """
         self.logging.info("reset terminal...")
         logging.getLogger().removeHandler(self.curses_handler)
         self.stdscr.keypad(0)

@@ -61,7 +61,7 @@ class Log:
         sys.stderr = StreamToLogger(self.logger, logging.ERROR)
 
     def route_to_stdout(self):
-
+        """Print log to stdout."""
         log_format = (
             '%(log_color)s'
             '%(asctime)s - '
@@ -72,9 +72,10 @@ class Log:
         )
 
         root = logging.getLogger()
-        root.setLevel(logging.DEBUG)
+        loglevel = logging.DEBUG if self.options.debug else logging.INFO
+        root.setLevel(loglevel)
         handler = logging.StreamHandler(self.stdout)
-        handler.setLevel(logging.DEBUG)
+        handler.setLevel(loglevel)
         handler.setFormatter(colorlog.ColoredFormatter(log_format))
 
         root.addHandler(handler)

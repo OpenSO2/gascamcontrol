@@ -1,6 +1,7 @@
 import asyncio
 import signal
 import logging
+import traceback
 import log
 import tui
 import conf
@@ -9,7 +10,6 @@ import comm
 import devicemanager
 from processingqueue import Queue
 import pluginmanager
-import traceback
 
 
 class Gascamcontrol():
@@ -55,10 +55,10 @@ class Gascamcontrol():
 #                print("Got CancelledError monitor_kbd")
 #                break
 
-    async def shutdown(self, signal=None):
+    async def shutdown(self, sig=None):
         """Stop application, kill background tasks, stop devices, cleanup."""
-        if signal:
-            self.logging.info("Received exit signal %s", signal.name)
+        if sig:
+            self.logging.info("Received exit signal %s", sig.name)
 
         self.logging.info("Shutting down...")
 
@@ -97,8 +97,9 @@ class Gascamcontrol():
                 self.logging.info("Got CancelledError tui")
                 break
 
-    def handle_exception(self, loop, context):
-        self.logging.error(f"Caught exception: {context}", exc_info=1)
+    def handle_exception(self, _loop, context):
+        """Shut down on asyncio exceptions and try to print a traceback."""
+        self.logging.error("Caught exception: %s", context, exc_info=1)
 
         if "exception" in context:
             traceback.print_tb(context["exception"].__traceback__)
@@ -107,17 +108,16 @@ class Gascamcontrol():
 
     def startup(self):
         """Start application."""
-        self.log = log.Log()
         if self.options.simpletui:
-            self.log.route_to_stdout()
+            log.Log().route_to_stdout()
         else:
             self.tui.startup()
             self.loop.create_task(self.monitor_tui())
 
         signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
-        for s in signals:
+        for sig in signals:
             self.loop.add_signal_handler(
-                s, lambda s=s: asyncio.create_task(self.shutdown(s)))
+                sig, lambda sig=sig: asyncio.create_task(self.shutdown(sig)))
         self.loop.set_exception_handler(self.handle_exception)
 
         self.logging.info("consume queue:")

@@ -39,7 +39,7 @@ class Spectrometer:  # pylint: disable=too-few-public-methods
     max = None
 
     def __str__(self):
-        return f"""spectrometer = {self.spectrometer}, 
+        return f"""spectrometer = {self.spectrometer},
                    lastSpectrum = {self.lastSpectrum},
                    integration_time_micros = {self.integration_time_micros}
                    len(wavelengths) = {len(self.wavelengths)}

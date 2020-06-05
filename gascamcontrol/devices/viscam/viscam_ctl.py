@@ -5,6 +5,7 @@ import logging
 import asyncio
 import cv2
 import configargparse
+import conf
 
 PACKAGE_PARENT = '../..'
 TOPLEVELPATH = os.path.realpath(os.path.join(os.getcwd(),
@@ -12,7 +13,6 @@ TOPLEVELPATH = os.path.realpath(os.path.join(os.getcwd(),
 SCRIPT_DIR = os.path.dirname(TOPLEVELPATH)
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
-import conf
 from devices.viscam.viscam import Viscam  # noqa: E402,E501 pylint: disable=C0413,E0401
 
 
