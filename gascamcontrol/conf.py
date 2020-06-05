@@ -7,7 +7,7 @@ import os
 import configargparse
 
 
-class Conf():
+class Conf:
     """Parse config file and command line arguments."""
 
     __monostate = None  # borg pattern
@@ -57,7 +57,7 @@ class Conf():
         paths.extend(xdg_config_dirs)
         return [os.path.join(p, default_filename) for p in paths if p]
 
-    def parse(self):
+    def parse(self, args=None):
         """Define and parse config file and cli arguments.
 
         The config file is parsed as a simple key=value syntax. Lines
@@ -89,7 +89,7 @@ class Conf():
         self.parser.add("--simpletui", action="store_true",
                         help="No interface, just log msgs.")
 
-        self.options = self.parser.parse_args()
+        self.options = self.parser.parse_args(args)
 
         # validate
         # TODO:

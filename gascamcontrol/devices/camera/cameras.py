@@ -21,8 +21,8 @@ def _setup():
     # parser.add("--ExposureTime_a", default=1004400)
     # parser.add("--ExposureTime_b", default=1004400)
 
-    parser.add("--camera_drivers", nargs="*")
-    parser.add("--camera_identifiers", nargs="*")
+    parser.add("--camera_drivers", nargs="*", default=[])
+    parser.add("--camera_identifiers", nargs="*", default=[])
 
     # wipe function to make sure it only runs once
     _setup.__code__ = (lambda: None).__code__

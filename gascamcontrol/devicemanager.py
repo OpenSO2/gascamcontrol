@@ -152,17 +152,19 @@ class Devicemanager:
         """
         # Find all running device tasks:
         pending = asyncio.all_tasks()
-        tasks = [task for task in pending if id(task) in self.running_tasks]
+        tasks = [task for task in pending
+                 if id(task) in self.running_tasks.values()]
         task_ids = {v: k for k, v in self.running_tasks.items()}
 
         self.logging.debug(
-            "stop %i devices '%s'", len(tasks), ", ".join(tasks))
+            "stop %i devices '%s'", len(tasks),
+            ", ".join([str(task) for task in tasks]))
 
         for task in tasks:
             self.logging.debug('cancel device task %s', task)
             task.cancel()
             self.logging.debug('canceled device task %s', task)
-            self.running_tasks.remove(task_ids(id(task)))
+            del self.running_tasks[task_ids[id(task)]]
 
         self.running = False
         self.logging.info("stopped devices")
