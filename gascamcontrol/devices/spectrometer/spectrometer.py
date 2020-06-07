@@ -60,6 +60,9 @@ class Spectrometer:
         await self.loop.run_in_executor(ThreadPoolExecutor(),
                                         self.driver.get, self.spectrometer)
 
+        assert self.spectrometer.wavelengths, \
+            "Spectrometer wavelenghts not set"
+
         return self.spectrometer.wavelengths, self.spectrometer.lastSpectrum
 
     async def stop(self):

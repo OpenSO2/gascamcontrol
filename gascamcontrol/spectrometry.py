@@ -39,28 +39,26 @@ def _setup():
 _setup()
 
 
-class Spectrometry():
+class Spectrometry:
     """Handle basic spectrometric functionality."""
 
-    def __init__(self, driver):
-        self.logging = logging.getLogger("myLog")
+    def __init__(self):
+        self.logging = logging.getLogger(__name__)
         self.options = conf.Conf().options
-        self.spectrometer = Spectrometer(driver)
+        self.spectrometer = Spectrometer()
         # driver=self.options.spectrometer_driver)
         self.electronic_offset = None
         self.dark_current = None
         self.no_of_scans = 1
         self.wavelengths = None
-
-        self.spectrum_length = self.spectrometer.spectrometer.spectrum_length
-        self.max = self.spectrometer.spectrometer.max
+        self.max = 0
+        self.spectrum_length = 0
 
         # set 1s as initial integration time
-        self.exposure_ms = 1000 * 1000
+        self.exposure_us = 1000 * 1000
 
     async def __aenter__(self):
-        await self.init()
-        return self
+        return await self.init()
 
     async def __aexit__(self, *args):
         await self.uninit()
@@ -68,7 +66,7 @@ class Spectrometry():
     async def init(self):
         """Initialize spectrometry and spectrometer."""
         await self.spectrometer.start()
-
+        self.max = self.spectrometer.spectrometer.max
         self.spectrum_length = self.spectrometer.spectrometer.spectrum_length
         return self
 
@@ -77,9 +75,10 @@ class Spectrometry():
 
         For SO2 measurements, the roi is between 300 and 325nm.
         """
-        roi = [i for i in zip(wavelengths, spectrum)
-               if i[0] >= self.options.spectrometry_roi_lower
-               and i[0] <= self.options.spectrometry_roi_upper]
+        roi_l, roi_u = (self.options.spectrometry_roi_lower,
+                        self.options.spectrometry_roi_upper)
+
+        roi = [i for i in zip(wavelengths, spectrum) if roi_l <= i[0] <= roi_u]
 
         _, roi_spectrum = zip(*roi)
         return max(roi_spectrum)  # should be something between 0..max
@@ -109,8 +108,11 @@ class Spectrometry():
         exposure = self.calc_exposure(wavelengths, spectrum)
         self.logging.debug(
             "spectro: find exposure time inttime: %s, max: %s, exposure: %s",
-            self.exposure_ms, self.max, exposure)
-        return .7 * self.exposure_ms * self.max / exposure
+            self.exposure_us, self.max, exposure)
+
+        assert self.exposure_us, "exposure_us not set, maybe calibrate first?"
+        assert self.max, "exposure_us not set, maybe init first?"
+        return .7 * self.exposure_us * self.max / exposure
 
     async def calibrate(self):
         """Calc and set electronic offset and dark current for corrections.
@@ -140,15 +142,15 @@ class Spectrometry():
 
         return photon_noise
 
-    async def mean_and_substract(self, number_of_spectra, exposure_ms):
+    async def mean_and_substract(self, number_of_spectra, exposure_us):
         """Average N corrected (!) spectra of M exposure."""
         spectrum = np.zeros(self.spectrum_length)
 
         dcit = self.options.dark_current_integration_time_s * 1E6
-        scale = exposure_ms / dcit
+        scale = exposure_us / dcit
 
         for _ in range(number_of_spectra):
-            _, dat = await self.spectrometer.get(exposure_ms)
+            _, dat = await self.spectrometer.get(exposure_us)
             spectrum += np.array(dat)
             spectrum -= np.array(self.electronic_offset)
             # substract dark current, scaled by integration time
@@ -170,8 +172,10 @@ class Spectrometry():
 
     async def measure(self):
         """Take a measurement."""
+        self.logging.debug("spectrometry: start measurement %i, %i",
+                           self.no_of_scans, self.exposure_us)
         spectrum = await self.mean_and_substract(self.no_of_scans,
-                                                 self.exposure_ms)
+                                                 self.exposure_us)
         self.logging.info("spectrometry: measurement done")
         return self.wavelengths, spectrum
 
