@@ -16,7 +16,7 @@ class Plugin(BasePlugin):
     ...    async with Plugin() as plugin:
     ...        return await plugin.get_metadata()
     >>> import asyncio
-    >>> md = asyncio.get_event_loop().run_until_complete(_test())
+    >>> md = asyncio.new_event_loop().run_until_complete(_test())
     >>> "latitude" in md
     True
     >>> "longitude" in md
