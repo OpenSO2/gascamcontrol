@@ -7,10 +7,10 @@ import importlib
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import logging
+import datetime
 import numpy as np
 import configargparse
 import conf
-import datetime
 
 
 def _setup():

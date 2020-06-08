@@ -3,8 +3,8 @@ import importlib
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import logging
-import configargparse
 from exceptions import InitError
+import configargparse
 import conf
 
 

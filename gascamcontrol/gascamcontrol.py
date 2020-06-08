@@ -109,7 +109,7 @@ class Gascamcontrol():
     def startup(self):
         """Start application."""
         if self.options.simpletui:
-            log.Log().route_to_stdout()
+            log.Log().route_to_stdout()  # pylint: disable=no-member
         else:
             self.tui.startup()
             self.loop.create_task(self.monitor_tui())

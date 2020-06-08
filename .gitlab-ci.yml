@@ -3,18 +3,19 @@ image: continuumio/miniconda3:latest
 before_script:
 #   - apt-get install -y cmake valgrind
   - apt-get update -q -y
-  - apt-get install -y build-essential cppcheck
+  - apt-get install -y build-essential cppcheck cmake
   - apt-get install -y libgl1-mesa-glx # conda opencv
+  - git submodule sync --recursive
+  - git submodule update --init --recursive
   - conda info -a
   - conda env create -n test-environment -f env.yml
   - source activate test-environment
   - python --version
-  - conda install flake8 pydocstyle pylint
-  - pip install cpplint
 
 stages:
   - Static Analysis
   - Test
+  - Coverage
 
 flake8:
   stage: Static Analysis
@@ -25,6 +26,11 @@ pylint:
   stage: Static Analysis
   script:
     - make pylint
+
+pycodestyle:
+  stage: Static Analysis
+  script:
+    - make pycodestyle
 
 pydocstyle:
   stage: Static Analysis
@@ -45,3 +51,14 @@ doctest:
   stage: Test
   script:
     - make doctest
+
+pytest:
+  stage: Test
+  script:
+    - make pytest
+
+coverage:
+  stage: Coverage
+  coverage: '/TOTAL.+?(\d+)%/'
+  script:
+    - make coverage
