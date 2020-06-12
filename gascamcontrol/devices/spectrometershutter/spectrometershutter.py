@@ -28,7 +28,9 @@ def _setup():
                default="/dev/serial/by-id/usb-Pololu_Corporation_Pololu"
                        "_Micro_Maestro_6-Servo_Controller_00135615-if00",
                help="spectrometer shutter device descriptor")
-
+    parser.add("--spectrometer_shutter_driver",
+               default="mock",
+               help="spectrometer shutter driver")
     # spectrometer shutter device channel - used for the pololu maestro
     # servo controller
     parser.add("--spectrometer_shutter_channel", default=5)
@@ -40,15 +42,15 @@ def _setup():
 _setup()
 
 
-class Spectrometershutter():
+class Spectrometershutter:
     """Implement shutter device for spectrometer.
 
     Delegates the actual implementation to the drivers in ./drivers.
     """
 
-    def __init__(self, driver):
-        self.drivername = driver
-        self.conf = conf.Conf().options
+    def __init__(self, driver=None):
+        self.options = conf.Conf().options
+        self.drivername = driver or self.options.spectrometer_shutter_driver
         self.loop = asyncio.get_event_loop()
         self.logging = logging.getLogger(__name__)
 
@@ -56,9 +58,10 @@ class Spectrometershutter():
                   f"{self.drivername}.spectrometershutter")
         self.driver = importlib.import_module(driver)
         self.spectrometershutter = self.driver.camerashutter()
-        self.spectrometershutter.device = self.conf.spectrometer_shutter_device
+        self.spectrometershutter.device = \
+            self.options.spectrometer_shutter_device
         self.spectrometershutter.channel = \
-            self.conf.spectrometer_shutter_channel
+            self.options.spectrometer_shutter_channel
 
     async def __aenter__(self):
         return await self.start()
