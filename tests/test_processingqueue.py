@@ -3,7 +3,7 @@ from gascamcontrol.processingqueue import Queue, QueueItem
 
 
 class TestQueueItem(unittest.TestCase):
-    def test_invalid_queueItem(self):
+    def test_invalid_queueitem(self):
         self.assertRaises(TypeError, QueueItem)
 
 
