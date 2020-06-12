@@ -1,9 +1,15 @@
 import asyncio
 import logging
 import json
+import copy
 import aiohttp
 from aiohttp import web
 import configargparse
+import conf
+
+# TODO:
+#  - receive & change conf
+#  - calc throughput
 
 
 def _setup():
@@ -18,43 +24,55 @@ def _setup():
 _setup()
 
 
-class Comm():
+class Comm:
     """Provide a bi-directional network interface."""
 
     def __init__(self):
-        self.app = None
         self.logger = logging.getLogger(__name__)
         self.loop = asyncio.get_event_loop()
-        self.websockets = []
+        self.websockets = {
+            "images": [],
+            "viscam": [],
+            "spec": [],
+            "conf": []
+        }  # all open socket connections
+        self.options = conf.Conf().options
+        self.site = None
 
-    async def websocket_handler(self, request):
+        self.app = web.Application()
+        self.app.add_routes([web.get('/ws/{resource}', self.ws_handler)])
+        self.app.router.add_static('/app', 'webapp', show_index=True)
+
+    async def ws_handler(self, request):
         """Handle websocket communication."""
         websocket = web.WebSocketResponse()
         await websocket.prepare(request)
-        self.websockets.append(websocket)
+        resource = request.match_info['resource']
+        self.websockets[resource].append(websocket)
 
-        async for msg in websocket:
-            if msg.type == aiohttp.WSMsgType.TEXT:
-                if msg.data == 'close':
-                    await websocket.close()
-                else:
-                    ans = msg.data + '/answer'
-                    self.logger.info("got msg %s, answered %s", msg.data, ans)
-                    # await websocket.send_str(ans)
-            elif msg.type == aiohttp.WSMsgType.ERROR:
-                self.logger.info('ws connection closed with exception %s',
-                                 websocket.exception())
+        if resource == "conf":
+            await websocket.send_json(self.options)
+
+        try:
+            async for msg in websocket:
+                if msg.type == aiohttp.WSMsgType.ERROR:
+                    self.logger.info('ws connection closed with exception %s',
+                                     websocket.exception())
+                    self.websockets[resource].remove(websocket)
+        finally:
+            await websocket.close()
+            self.websockets[resource].remove(websocket)
 
         self.logger.info('websocket connection closed')
 
         return websocket
 
     async def send(self, item):
-        """Send data to all clients."""
-        for websocket in self.websockets:
+        """Send data to all subscribed clients."""
+        item = copy.deepcopy(item)
+        for websocket in self.websockets[item.type]:
             meta = item.meta
             meta["date"] = str(meta["date"])
-
             metab = bytes(json.dumps(meta), "utf-8")
             meta_len = bytes(str(len(metab)).rjust(4), "utf-8")
             data = meta_len + metab + item.data.tobytes()
@@ -63,21 +81,21 @@ class Comm():
             self.logger.debug("bytes send %i %s", len(data),
                               str(len(metab)).rjust(4))
 
-    @staticmethod
-    def serve_display(app):
-        """Server static webapp."""
-        app.router.add_static('/app', 'webapp', show_index=True)
-
     def run(self):
         """Start running server and websocket."""
-        app = web.Application()
+        runner = web.AppRunner(self.app)
+        task = self.loop.create_task(runner.setup())
+        self.loop.run_until_complete(task)
 
-        app.add_routes([web.get('/ws', self.websocket_handler)])
-        self.serve_display(app)
+        port = self.options.port if "port" in self.options else None
+        self.site = web.TCPSite(runner, port=port)
+        self.loop.run_until_complete(self.site.start())
 
-        self.logger.info("run comm")
+        self.logger.info("Serving on port %s", self.options.port)
 
-        runner = web.AppRunner(app)
-        self.loop.run_until_complete(runner.setup())
-        site = web.TCPSite(runner)
-        self.loop.run_until_complete(site.start())
+    async def stop(self):
+        """Stop and clean up server, disconnect socket clients."""
+        self.logger.warning("stopping comm")
+        await self.site.stop()
+        await self.app.shutdown()
+        await self.app.cleanup()

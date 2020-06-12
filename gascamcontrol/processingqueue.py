@@ -1,6 +1,7 @@
 """Manage a global fifo queue system for data received from sensors."""
 import asyncio
 import logging
+import numpy as np
 
 # meta
 #   type eg 310, 330
@@ -59,22 +60,29 @@ class QueueItem:  # pylint: disable=R0903
     def __init__(self, data, meta):
         self.data = data
         self.meta = meta
+        self.type = None
 
 
 class CamQueueItem(QueueItem):  # pylint: disable=R0903
     """Container for camera image."""
 
+    def __init__(self, *args, **kwargs):
+        super(CamQueueItem, self).__init__(*args, **kwargs)
+        self.type = "images"
+
 
 class ViscamQueueItem(QueueItem):  # pylint: disable=R0903
     """Container for viscam image."""
+
+    def __init__(self, *args, **kwargs):
+        super(ViscamQueueItem, self).__init__(*args, **kwargs)
+        self.type = "viscam"
 
 
 class SpecQueueItem(QueueItem):  # pylint: disable=R0903
     """Container for Spectrogram."""
 
     def __init__(self, wavelengths, spectrum, meta):
-        super().__init__(zip(wavelengths, spectrum), meta)
-
-    # def __init__(self, data, meta):
-    #     self.data = data
-    #     self.meta = meta
+        data = np.dstack((wavelengths, spectrum))
+        super(SpecQueueItem, self).__init__(data, meta)
+        self.type = "spec"
