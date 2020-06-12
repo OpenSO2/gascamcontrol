@@ -32,6 +32,9 @@ pytest: compile_drivers
 coverage: compile_drivers
 	python -m pytest --doctest-modules tests gascamcontrol --ignore-glob=*/pybind11*/ --ignore gascamcontrol/plugins/gps --ignore gascamcontrol/devices/spectrometer/drivers/mock/spectrometer.py  --ignore gascamcontrol/devices/spectrometer/drivers/oceanoptics/spectrometer.py --cov=gascamcontrol
 
+coverage_html: compile_drivers
+	python -m pytest --doctest-modules tests gascamcontrol --ignore-glob=*/pybind11*/ --ignore gascamcontrol/plugins/gps --ignore gascamcontrol/devices/spectrometer/drivers/mock/spectrometer.py  --ignore gascamcontrol/devices/spectrometer/drivers/oceanoptics/spectrometer.py --cov=gascamcontrol --cov-report html:cov_html
+
 compile_drivers:
 	cd gascamcontrol/devices; ./make_all.sh
 
