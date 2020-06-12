@@ -2,6 +2,7 @@ import asyncio
 import logging
 import json
 import copy
+import os
 import aiohttp
 from aiohttp import web
 import configargparse
@@ -41,7 +42,8 @@ class Comm:
 
         self.app = web.Application()
         self.app.add_routes([web.get('/ws/{resource}', self.ws_handler)])
-        self.app.router.add_static('/app', 'webapp', show_index=True)
+        path = os.path.dirname(os.path.abspath(__file__))
+        self.app.router.add_static('/app', f'{path}/webapp', show_index=True)
 
     async def ws_handler(self, request):
         """Handle websocket communication."""
