@@ -1,0 +1,12 @@
+[run]
+omit =
+    gascamcontrol/plugins/gps/aiogps.py
+    gascamcontrol/plugins/gps/client.py
+    gascamcontrol/plugins/gps/clienthelpers.py
+    gascamcontrol/plugins/gps/fake.py
+    gascamcontrol/plugins/gps/gps.py
+    gascamcontrol/plugins/gps/misc.py
+    gascamcontrol/plugins/gps/watch_options.py
+    gascamcontrol/devices/spectrometer/drivers/mock/spectrometer.py
+    gascamcontrol/devices/spectrometer/drivers/oceanoptics/spectrometer.py
+    gascamcontrol/devices/spectrometer/spectrometer.py
