@@ -16,6 +16,7 @@ stages:
   - Static Analysis
   - Test
   - Coverage
+  - Packaging
 
 flake8:
   stage: Static Analysis
@@ -58,14 +59,19 @@ pytest:
     - make pytest
 
 conda-env:
-  stage: Test
+  stage: Packaging
   script:
-    - make test_environment
+    - conda init bash
+    - source ~/.bashrc
+    - conda env create -f environment.yml -n gascamcontrol-env
+    - conda activate gascamcontrol-env
+    - conda deactivate
+    - conda env remove -n gascamcontrol-env
 
-conda-packages:
-  stage: Test
+conda-package:
+  stage: Packaging
   script:
-    - make test_environment
+    - make conda_package
 
 coverage:
   stage: Coverage
