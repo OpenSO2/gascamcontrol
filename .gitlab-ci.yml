@@ -8,7 +8,7 @@ before_script:
   - git submodule sync --recursive
   - git submodule update --init --recursive
   - conda info -a
-  - conda env create -n test-environment -f env.yml
+  - conda env create -n test-environment -f environment.yml
   - source activate test-environment
   - python --version
 
@@ -56,6 +56,16 @@ pytest:
   stage: Test
   script:
     - make pytest
+
+conda-env:
+  stage: Test
+  script:
+    - make test_environment
+
+conda-packages:
+  stage: Test
+  script:
+    - make test_environment
 
 coverage:
   stage: Coverage

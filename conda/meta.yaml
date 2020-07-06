@@ -1,0 +1,32 @@
+{% set version = "1.1.0" %}
+
+package:
+  name: gascamcontrol
+  version: {{ GIT_DESCRIBE_TAG }}
+
+build:
+  number: {{ GIT_DESCRIBE_NUMBER }}
+  string: {{ GIT_BUILD_STR }}
+
+source:
+  git_url: ../
+
+requirements:     # (optional)
+  build:
+    - python=3.6
+    - colorlog
+    - aiohttp
+    - numpy
+    - configargparse
+    - opencv
+    - matplotlib
+    - aiohttp
+
+  run:
+    - python
+    - colorlog
+    - opencv
+
+test:
+  imports:
+    - gascamcontrol

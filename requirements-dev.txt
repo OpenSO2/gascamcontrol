@@ -1,3 +1,0 @@
-pydocstyle
-pylint
-flake8

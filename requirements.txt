@@ -1,4 +1,0 @@
-configargparse
-opencv-python
-matplotlib
-numpy

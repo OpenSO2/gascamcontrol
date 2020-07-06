@@ -12,10 +12,7 @@ dependencies:
   - flake8
   - pydocstyle
   - pylint
-  - pip
-  - pip:
-    - colorlog
-    - cpplint
-    - pytest-gitignore
-    - pytest-cov
-    - pycodestyle
+  - colorlog
+  - cpplint
+  - pytest-cov
+  - pycodestyle

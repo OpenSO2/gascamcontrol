@@ -38,5 +38,17 @@ coverage_html: compile_drivers
 compile_drivers:
 	cd gascamcontrol/devices; ./make_all.sh
 
+conda_package:
+	conda build . -c conda-forge
+
+create_environment:
+	conda env create -f environment.yml -n gascamcontrol-env
+	conda activate gascamcontrol-env
+
+remove_environment:
+	conda env remove -n gascamcontrol-env
+
+test_environment: create_environment remove_environment
+
 lint: flake8 pylint pycodestyle pydocstyle cppcheck cpplint
 test: doctest pytest
