@@ -16,3 +16,4 @@ dependencies:
   - cpplint
   - pytest-cov
   - pycodestyle
+  - conda-build
