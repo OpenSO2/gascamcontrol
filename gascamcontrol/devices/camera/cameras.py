@@ -2,8 +2,8 @@
 import logging
 import asyncio
 import configargparse
-import conf
-from devices.camera.camera import Camera
+from ...conf import Conf
+from .camera import Camera
 
 
 def _setup():
@@ -40,7 +40,7 @@ class Cameras():
         self.logging = self.logger
         self.logger.info("initialize cameras")
 
-        self.options = conf.Conf().options
+        self.options = Conf().options
 
         self.logger.info("cameras to init: %s, %s ",
                          self.options.camera_drivers,

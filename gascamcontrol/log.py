@@ -3,7 +3,7 @@ import logging
 import sys
 import configargparse
 import colorlog
-import conf
+from .conf import Conf
 
 
 def _setup():
@@ -45,7 +45,7 @@ class Log:
         self.stderr = sys.stderr
 
         self.logger = logging.getLogger()
-        self.options = conf.Conf().options
+        self.options = Conf().options
         self.route_to_file()
         self.route_print()
 

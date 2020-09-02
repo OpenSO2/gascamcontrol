@@ -4,7 +4,7 @@ import os
 import asyncio
 import configargparse
 import matplotlib.pyplot as plt
-import conf
+from ...conf import Conf
 
 PACKAGE_PARENT = '../..'
 TOPLEVELPATH = os.path.realpath(os.path.join(os.getcwd(),
@@ -63,7 +63,7 @@ def main():
     parser.description = 'Spectrometer live viewer'
 
     options = parser.parse_args()
-    conf.Conf().options = options
+    Conf().options = options
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(plot())

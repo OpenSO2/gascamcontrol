@@ -3,7 +3,7 @@ import asyncio
 import logging
 from importlib import import_module
 import configargparse
-import conf
+from .conf import Conf
 
 
 _PLUGIN_PATH = os.path.join(os.path.dirname(__file__), "plugins")
@@ -35,7 +35,7 @@ class Pluginmanager():
     def __init__(self):
         self.loop = asyncio.get_event_loop()
         self.logging = logging.getLogger(__name__)
-        self.options = conf.Conf().options
+        self.options = Conf().options
 
         self.plugins = [import_module(f"{_PLUGIN_PATH}.{name}.plugin").Plugin()
                         for name in self.options.plugins]

@@ -3,9 +3,9 @@ import importlib
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import logging
-from exceptions import InitError
+from ...exceptions import InitError
 import configargparse
-import conf
+from ...conf import Conf
 
 
 def _setup():
@@ -49,14 +49,13 @@ class Spectrometershutter:
     """
 
     def __init__(self, driver=None):
-        self.options = conf.Conf().options
+        self.options = Conf().options
         self.drivername = driver or self.options.spectrometer_shutter_driver
         self.loop = asyncio.get_event_loop()
         self.logging = logging.getLogger(__name__)
 
-        driver = (f"devices.spectrometershutter.drivers."
-                  f"{self.drivername}.spectrometershutter")
-        self.driver = importlib.import_module(driver)
+        driver = f".drivers.{self.drivername}.spectrometershutter"
+        self.driver = importlib.import_module(driver, package=__package__)
         self.spectrometershutter = self.driver.camerashutter()
         self.spectrometershutter.device = \
             self.options.spectrometer_shutter_device

@@ -2,33 +2,33 @@ import asyncio
 import signal
 import logging
 import traceback
-import log
-import tui
-import conf
-import diskmanager
-import comm
-import devicemanager
-from processingqueue import Queue
-import pluginmanager
+from .log import Log
+from .tui import Tui
+from .conf import Conf
+from .diskmanager import Diskmanager
+from .comm import Comm
+from .devicemanager import Devicemanager
+from .processingqueue import Queue
+from .pluginmanager import Pluginmanager
 
 
 class Gascamcontrol():
     """Setup basic plumbing."""
 
     def __init__(self):
-        self.conf = conf.Conf()
+        self.conf = Conf()
         self.conf.parse()
         self.options = self.conf.options
 
         self.logging = logging.getLogger(__name__)
-        self.tui = tui.Tui()
-        self.diskmanager = diskmanager.Diskmanager()
-        self.comm = comm.Comm()
+        self.tui = Tui()
+        self.diskmanager = Diskmanager()
+        self.comm = Comm()
         # self.display = display.Display()
         self.queue = Queue()
         self.loop = asyncio.get_event_loop()
-        self.devices = devicemanager.Devicemanager()
-        self.pluginmanager = pluginmanager.Pluginmanager()
+        self.devices = Devicemanager()
+        self.pluginmanager = Pluginmanager()
 
     async def consume_queue(self):
         """Process items from queue."""
@@ -109,7 +109,7 @@ class Gascamcontrol():
     def startup(self):
         """Start application."""
         if self.options.simpletui:
-            log.Log().route_to_stdout()  # pylint: disable=no-member
+            Log().route_to_stdout()  # pylint: disable=no-member
         else:
             self.tui.startup()
             self.loop.create_task(self.monitor_tui())

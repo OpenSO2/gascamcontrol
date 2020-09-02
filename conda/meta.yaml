@@ -1,8 +1,8 @@
-{% set version = "1.1.0" %}
+{% set data = load_setup_py_data() %}
 
 package:
   name: gascamcontrol
-  version: {{ GIT_DESCRIBE_TAG }}
+  version: {{ data.get('version') }}
 
 build:
   number: {{ GIT_DESCRIBE_NUMBER }}
@@ -23,10 +23,20 @@ requirements:     # (optional)
     - aiohttp
 
   run:
-    - python
+    - python=3.6
     - colorlog
+    - aiohttp
+    - numpy
+    - configargparse
     - opencv
+    - matplotlib
+    - aiohttp
+
 
 test:
+  commands:
+    - gascamcontrol --version
   imports:
     - gascamcontrol
+  source_files:
+    - gascamcontrol/plugins

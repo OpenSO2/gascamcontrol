@@ -5,7 +5,7 @@ import logging
 import asyncio
 import cv2
 import configargparse
-import conf
+from ...conf import Conf
 
 PACKAGE_PARENT = '../..'
 TOPLEVELPATH = os.path.realpath(os.path.join(os.getcwd(),
@@ -32,7 +32,7 @@ def main():
                         help="Print debug messaged")
     options, _ = parser.parse_known_args()
 
-    conf.Conf().options = options
+    Conf().options = options
 
     logging.basicConfig(level=logging.DEBUG if options.debug else logging.INFO)
 

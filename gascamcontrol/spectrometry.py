@@ -5,8 +5,8 @@ Ported from spectrometry.c
 import logging
 import configargparse
 import numpy as np
-from devices.spectrometer.spectrometer import Spectrometer
-import conf
+from .devices.spectrometer.spectrometer import Spectrometer
+from .conf import Conf
 
 
 def _setup():
@@ -44,7 +44,7 @@ class Spectrometry:
 
     def __init__(self):
         self.logging = logging.getLogger(__name__)
-        self.options = conf.Conf().options
+        self.options = Conf().options
         self.spectrometer = Spectrometer()
         # driver=self.options.spectrometer_driver)
         self.electronic_offset = None

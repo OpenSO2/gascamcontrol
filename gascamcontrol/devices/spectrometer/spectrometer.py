@@ -4,7 +4,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import logging
 import configargparse
-import conf
+from ...conf import Conf
 
 
 def _setup():
@@ -27,14 +27,14 @@ class Spectrometer:
     """
 
     def __init__(self, driver=None):
-        self.options = conf.Conf().options
+        self.options = Conf().options
 
         self.drivername = driver or self.options.spectrometer_driver
         self.loop = asyncio.get_event_loop()
         self.logging = logging.getLogger(__name__)
 
-        driv = f"devices.spectrometer.drivers.{self.drivername}.spectrometer"
-        self.driver = importlib.import_module(driv)
+        driver = f".drivers.{self.drivername}.spectrometer"
+        self.driver = importlib.import_module(driver, package=__package__)
         self.spectrometer = self.driver.Spectrometer()
 
     async def __aenter__(self):

@@ -30,8 +30,8 @@ class Camera():
         self.logging = self.logger
         self.logging.info("init camera %s %s", driver, identifier)
 
-        driver = f"devices.camera.drivers.{self.drivername}.camera"
-        self.driver = importlib.import_module(driver)
+        driver = f".drivers.{self.drivername}.camera"
+        self.driver = importlib.import_module(driver, package=__package__)
         self.camera = self.driver.camera()
 
         self.logger.debug("identifier %s", self.identifier)

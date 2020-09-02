@@ -10,7 +10,7 @@ import logging
 import datetime
 import numpy as np
 import configargparse
-import conf
+from ...conf import Conf
 
 
 def _setup():
@@ -33,12 +33,12 @@ class Viscam:
     """
 
     def __init__(self, driver=None):
-        self.options = conf.Conf().options
+        self.options = Conf().options
         self.drivername = driver or self.options.viscam_driver
         self.loop = asyncio.get_event_loop()
         self.logging = logging.getLogger(__name__)
-        driver = f"devices.viscam.drivers.{self.drivername}.viscam"
-        self.driver = importlib.import_module(driver)
+        driver = f".drivers.{self.drivername}.viscam"
+        self.driver = importlib.import_module(driver, package=__package__)
         self.viscam = self.driver.viscam()
 
     async def __aenter__(self):

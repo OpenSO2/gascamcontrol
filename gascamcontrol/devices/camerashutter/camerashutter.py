@@ -24,7 +24,7 @@ def _setup():
 _setup()
 
 
-class Camerashutter():
+class Camerashutter:
     """Device to block light to the camera(s) for dark image correction.
 
     Delegates the actual implementation to the drivers in ./drivers.
@@ -35,8 +35,10 @@ class Camerashutter():
         self.loop = asyncio.get_event_loop()
         self.logger = logging.getLogger(__name__)
 
-        driver = f"devices.camerashutter.drivers.{driver}.camerashutter"
-        self.driver = importlib.import_module(driver)
+        print(__name__, __package__)
+
+        driver = f".drivers.{driver}.camerashutter"
+        self.driver = importlib.import_module(driver, package=__package__)
         self.camerashutter = self.driver.camerashutter()
         self.camerashutter.device = device
 

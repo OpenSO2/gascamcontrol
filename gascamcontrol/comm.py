@@ -6,7 +6,7 @@ import os
 import aiohttp
 from aiohttp import web
 import configargparse
-import conf
+from .conf import Conf
 
 # TODO:
 #  - receive & change conf
@@ -37,7 +37,7 @@ class Comm:
             "spec": [],
             "conf": []
         }  # all open socket connections
-        self.options = conf.Conf().options
+        self.options = Conf().options
         self.site = None
 
         self.app = web.Application()

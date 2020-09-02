@@ -3,12 +3,13 @@
 import asyncio
 import logging
 import configargparse
-import conf
-from processingqueue import CamQueueItem, Queue, ViscamQueueItem, SpecQueueItem
-from devices.viscam.viscam import Viscam
-from devices.camera.cameras import Cameras
-from devices.camerashutter.camerashutter import Camerashutter
-from spectrometry import Spectrometry
+from .conf import Conf
+from .processingqueue import (CamQueueItem, Queue, ViscamQueueItem,
+                              SpecQueueItem)
+from .devices.viscam.viscam import Viscam
+from .devices.camera.cameras import Cameras
+from .devices.camerashutter.camerashutter import Camerashutter
+from .spectrometry import Spectrometry
 
 
 def _setup():
@@ -47,13 +48,13 @@ class Devicemanager:
             self.loop = asyncio.get_event_loop()
             self.logging = logging.getLogger(__name__)
             self.running_tasks = {}
-            self.options = conf.Conf().options
+            self.options = Conf().options
             self.queue = Queue()
             self.noofimages = 0
             self.camerashutter = Camerashutter(
                 driver=self.options.camerashutter_driver,
                 device=self.options.camerashutter_device)
-            self.options = conf.Conf().options
+            self.options = Conf().options
 
     async def viscam(self):
         """Run viscam and put images into queue."""

@@ -4,6 +4,7 @@ This file only manages global config settings, device specific settings are
 handled in the individual device managers (eg. viscam/viscam.py).
 """
 import os
+from pathlib import Path
 import configargparse
 
 
@@ -20,6 +21,12 @@ class Conf:
             self.options = {}
 
         self.parser = None
+
+    def get_version(self):
+        """Get version number from static version text file."""
+        pkgbase = Path(__file__).parent
+        with open(f"{pkgbase}/_version.txt", "r") as versionfile:
+            return versionfile.read()
 
     def get_config_file_paths(self):
         """Find, load and parse a config file.
@@ -88,6 +95,9 @@ class Conf:
 
         self.parser.add("--simpletui", action="store_true",
                         help="No interface, just log msgs.")
+
+        self.parser.add('--version', action='version',
+                        version=self.get_version())
 
         self.options = self.parser.parse_args(args)
 

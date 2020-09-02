@@ -4,7 +4,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 import configargparse
 import cv2
-import conf
+from .conf import Conf
 
 
 def _setup():
@@ -51,7 +51,7 @@ class Diskmanager():
 
             self.loop = asyncio.get_event_loop()
             self.logging = logging.getLogger(__name__)
-            self.options = conf.Conf().options
+            self.options = Conf().options
             self.noofimages = 0
             self.noofviscam = 0
 

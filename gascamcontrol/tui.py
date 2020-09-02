@@ -2,10 +2,10 @@
 # https://docs.python.org/3.6/library/textwrap.html
 import logging
 import curses
-from processingqueue import Queue
-import devicemanager
-import diskmanager
-# import conf
+from .processingqueue import Queue
+from .devicemanager import Devicemanager
+from .diskmanager import Diskmanager
+from .conf import Conf
 
 
 class CursesHandler(logging.Handler):
@@ -37,9 +37,10 @@ class Tui:
         self.logging = self.logger
         self._status_win = None
         self.queue = Queue()
-        self.devicemanager = devicemanager.Devicemanager()
-        self.diskmanager = diskmanager.Diskmanager()
+        self.devicemanager = Devicemanager()
+        self.diskmanager = Diskmanager()
         self.curses_handler = None
+        self.conf = Conf()
 
     def startup(self):
         """Initiate curses."""
@@ -165,7 +166,7 @@ class Tui:
         win.addstr(3, 1, "A control program for run multi-view cameras and ")
         win.addstr(4, 1, "pre-process UV camera data.")
         win.addstr(5, 1, "")
-        win.addstr(6, 1, "Version: 0.1")
+        win.addstr(6, 1, f"Version: {self.conf.get_version()}")
         win.addstr(7, 1, "Licence: MIT")
         win.addstr(8, 1, "Source: git.io/Jv3hl")
         win.addstr(9, 1, "Info: johann.jacobson@uni-hamburg.de")
