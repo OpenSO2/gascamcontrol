@@ -3,8 +3,8 @@ import asyncio
 import logging
 import csv
 import configargparse
-from spectrometry import Spectrometry
-import conf
+from gascamcontrol.spectrometry import Spectrometry
+from gascamcontrol.conf import Conf
 
 
 def save_spectrum(filename, wavelengths, data):
@@ -48,7 +48,7 @@ def main():
     parser.add_argument("--debug", action="store_true",
                         help="Print debug messaged")
     options = parser.parse_args()
-    conf.Conf().options = options
+    Conf().options = options
 
     logging.basicConfig(level=logging.DEBUG if options.debug else logging.INFO)
 

@@ -48,15 +48,10 @@ cpplint:
   script:
     - make cpplint
 
-doctest:
+test:
   stage: Test
   script:
-    - make doctest
-
-pytest:
-  stage: Test
-  script:
-    - make pytest
+    - make test
 
 conda-env:
   stage: Packaging

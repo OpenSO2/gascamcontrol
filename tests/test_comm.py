@@ -1,6 +1,4 @@
 import unittest
-import sys
-import os
 import json
 from datetime import datetime
 from argparse import Namespace
@@ -9,12 +7,11 @@ from dateutil.parser import parse
 import numpy as np
 import aiohttp
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
-sys.path.append(os.path.realpath(os.path.dirname(__file__)
-                                 + "/../gascamcontrol"))
 
-from comm import Comm  # noqa: E402,E501 pylint: disable=C0413,E0401
-from processingqueue import CamQueueItem, ViscamQueueItem, SpecQueueItem  # noqa: E402,E501 pylint: disable=C0413,E0401
-import conf  # noqa: E402,E501 pylint: disable=C0413,E0401
+from gascamcontrol.comm import Comm
+from gascamcontrol.processingqueue import (CamQueueItem, ViscamQueueItem,
+                                           SpecQueueItem)
+from gascamcontrol import conf
 
 
 class TestComm(AioHTTPTestCase):

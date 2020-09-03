@@ -1,19 +1,10 @@
 """Command line viscam program for testing and demonstration."""
-import sys
-import os
 import logging
 import asyncio
 import cv2
 import configargparse
 from ...conf import Conf
-
-PACKAGE_PARENT = '../..'
-TOPLEVELPATH = os.path.realpath(os.path.join(os.getcwd(),
-                                             os.path.expanduser(__file__)))
-SCRIPT_DIR = os.path.dirname(TOPLEVELPATH)
-sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
-
-from devices.viscam.viscam import Viscam  # noqa: E402,E501 pylint: disable=C0413,E0401
+from .viscam import Viscam
 
 
 async def capture(filename):
