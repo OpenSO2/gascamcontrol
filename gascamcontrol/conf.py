@@ -97,7 +97,8 @@ class Conf:
                         help="No interface, just log msgs.")
 
         self.parser.add('--version', action='version',
-                        version=self.get_version())
+                        version=self.get_version(),
+                        help="Print version number and exit.")
 
         self.options = self.parser.parse_args(args)
 
